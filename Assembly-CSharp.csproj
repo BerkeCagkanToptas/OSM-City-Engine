@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+	<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+	<ProductVersion>10.0.20506</ProductVersion>
+	<SchemaVersion>2.0</SchemaVersion>
+	<ProjectGuid>{87998017-FD74-E7B7-498A-07D96AFB2B96}</ProjectGuid>
+	<OutputType>Library</OutputType>
+	<AppDesignerFolder>Properties</AppDesignerFolder>
+	<RootNamespace></RootNamespace>
+	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+	<FileAlignment>512</FileAlignment>
+	<BaseDirectory>Assets</BaseDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
+	<Optimize>false</Optimize>
+	<OutputPath>Temp\bin\Debug\</OutputPath>
+	<DefineConstants>DEBUG;TRACE;UNITY_5_0_1;UNITY_5_0;UNITY_5;ENABLE_LICENSE_RENAME;ENABLE_NEW_BUGREPORTER;ENABLE_2D_PHYSICS;ENABLE_4_6_FEATURES;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_FRAME_DEBUGGER;ENABLE_GENERICS;ENABLE_HOME_SCREEN;ENABLE_IMAGEEFFECTS;ENABLE_LIGHT_PROBES_LEGACY;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_NEW_HIERARCHY;ENABLE_PHYSICS;ENABLE_PHYSICS_PHYSX3;ENABLE_PLUGIN_INSPECTOR;ENABLE_SHADOWS;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_UNITYEVENTS;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_AUDIOMIXER_SUSPEND;ENABLE_NONPRO;INCLUDE_DYNAMIC_GI;INCLUDE_GI;INCLUDE_IL2CPP;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;UNITY_STANDALONE_WIN;UNITY_STANDALONE;ENABLE_SUBSTANCE;ENABLE_TEXTUREID_MAP;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_MONO;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN;CROSS_PLATFORM_INPUT</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<DebugType>pdbonly</DebugType>
+	<Optimize>true</Optimize>
+	<OutputPath>Temp\bin\Release\</OutputPath>
+	<DefineConstants>TRACE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+	<Reference Include="System" />
+    <Reference Include="System.XML" />
+	<Reference Include="System.Core" />
+	<Reference Include="System.Xml.Linq" />
+	<Reference Include="UnityEngine">
+	  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="UnityEditor">
+	  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
+	</Reference>
+  </ItemGroup>
+  <ItemGroup>
+     <Compile Include="Assets\Scripts\ConfigHandler\InitialConfigLoader.cs" />
+     <Compile Include="Assets\Scripts\ConfigHandler\LoadConfig.cs" />
+     <Compile Include="Assets\Scripts\ConfigHandler\SaveConfig.cs" />
+     <Compile Include="Assets\Scripts\HeightMap\Geography.cs" />
+     <Compile Include="Assets\Scripts\HeightMap\HeighmapLoader.cs" />
+     <Compile Include="Assets\Scripts\HeightMap\TerrainTextureHandler.cs" />
+     <Compile Include="Assets\Scripts\OpenStreetMap\OSMparser.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\Area.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\Barrier.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\Building.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\Highway.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\Scene.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\TrafficLight.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\myTerrain.cs" />
+     <Compile Include="Assets\Scripts\SceneObjects\myTree.cs" />
+     <Compile Include="Assets\Scripts\UnitySideScripts\CreateScene.cs" />
+     <Compile Include="Assets\Scripts\UnitySideScripts\FreeFlyCamera.cs" />
+     <Compile Include="Assets\Scripts\UnitySideScripts\LeftMenu.cs" />
+     <Compile Include="Assets\Scripts\UnitySideScripts\SelectOSMButton.cs" />
+     <Compile Include="Assets\Scripts\Utils\Downloader.cs" />
+     <Compile Include="Assets\Scripts\Utils\FileBrowser.cs" />
+     <Compile Include="Assets\Scripts\Utils\FileDownloader.cs" />
+     <Compile Include="Assets\Scripts\Utils\GUILayoutx.cs" />
+     <Compile Include="Assets\Scripts\Utils\Geometry.cs" />
+     <Compile Include="Assets\Scripts\Utils\Triangulator.cs" />
+     <Compile Include="Assets\Scripts\Utils\UniZip.cs" />
+     <None Include="Assets\Resources\OSMFiles\comoGeneral.xml" />
+     <None Include="Assets\Resources\OSMFiles\Pannilani.xml" />
+     <None Include="Assets\Resources\OSMFiles\Brunate.xml" />
+ <Reference Include="UnityEngine.UI">
+ <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="Ionic.Zip">
+ <HintPath>C:/Users/user/Documents/Unity3D Workspace/Polimi OSM City Engine/Assets/Ionic.Zip.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+ <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/iossupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+ </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	   Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  
+</Project>
