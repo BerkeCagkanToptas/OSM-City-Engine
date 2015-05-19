@@ -8,6 +8,7 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes OpenStre
 3. 3D Terrain Rendering
 4. 3D Barrier, Wall, Fence Rendering
 5. 3D Models like Trees, Traffic Lights, Cars etc. support
+6. Geography Library to apply Projection Conversions between UTM(EPSG:4326) and Spherical Mercator(EPSG:3857) 
 6. "Freefly Camera" Mode and  "Car Camera" Modes
 7. Edit Menu
 8. Load/Save 3D scene
