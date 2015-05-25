@@ -50,6 +50,15 @@ namespace Assets.Scripts.OpenStreetMap
             configloader = new InitialConfigLoader();
         }
 
+        /// <summary>
+        ///  Constructs the scene from given parameters
+        /// </summary>
+        /// <param name="OSMfilename"></param>
+        /// Full path of OSM file
+        /// <param name="continent"></param>
+        /// Specify Continent to download correct Heightmap from Nasa Srtm Data
+        /// <param name="provider"></param>
+        /// Choose mapProvider to select Texture of Terrain
         public void initializeScene(string OSMfilename, HeightmapContinent continent, MapProvider provider)
         {
             OSMparser parser = new OSMparser();
@@ -86,7 +95,7 @@ namespace Assets.Scripts.OpenStreetMap
                             highwayList.Add(new Highway(w, config.highwayConfig,terrain));
                         break;
                     case wayType.area:
-                        continue;
+                        //continue;
                         areaList.Add(new Area(w, config.areaConfig));
                         break;
                     case wayType.barrier:
@@ -105,6 +114,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
+        //Seperate WayType of OSM into our City Engine object types
         private wayType getWayTpe(Way way)
         {
             if (way.tags == null)
@@ -143,7 +153,7 @@ namespace Assets.Scripts.OpenStreetMap
             return wayType.none;
         }
 
-
+        //Converts Spherical Mercator Coordinates to Unity Coordinates
         private void assignNodePositions()
         {
             Geography proj = new Geography();
@@ -188,7 +198,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
-
+        //Apply Correction to the Osm bbox
         private BBox editbbox(BBox bbox)
         {
             Geography proj = new Geography();
@@ -201,18 +211,19 @@ namespace Assets.Scripts.OpenStreetMap
             return bbox;
         }
 
-
+        //Draw Trees in the scene
         private void drawTrees(List<Node> _treeList)
         {
             for (int i = 0; i < _treeList.Count; i++)
             {
-                GameObject tree = (GameObject) MonoBehaviour.Instantiate(Resources.Load("Environment/SpeedTree/BroadLeaf/BroadLeaf_Desktop"));
+                GameObject tree = (GameObject) MonoBehaviour.Instantiate(Resources.Load("Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeaf_Desktop"));
                 tree.transform.position = _treeList[i].meterPosition;
                 treeList.Add(tree);
                 
             }
         }
 
+        //For relation building : check for duplicate with normal building 
         private bool isDuplicateBuilding(string id)
         {
             for (int k = 0; k < osmxml.relationList.Count; k++)

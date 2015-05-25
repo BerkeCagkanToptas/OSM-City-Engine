@@ -82,9 +82,9 @@ namespace Assets.Scripts.HeightMap
             Debug.Log("<color=blue>HEIGHTMAP</color> Download Complete!!");
 
             string extractPath = Path.Combine(Application.persistentDataPath, "HeightmapFiles");
-            if(!File.Exists(extractPath))
+            if (!File.Exists(extractPath))
                 UniZip.Unzip(savePath, extractPath);
-
+            
             Debug.Log("<color=blue>HEIGHTMAP</color> Filemap Uncompress Complete!!");
 
             fillHeightmap(extractPath + "/" + savedFilename);

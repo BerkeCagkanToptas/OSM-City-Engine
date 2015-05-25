@@ -93,7 +93,9 @@ namespace Assets.Scripts.ConfigHandler
         public void saveInitialConfig(string path, InitialConfigurations config)
         {
             var serializer = new XmlSerializer(typeof(InitialConfigurations));
-            using (var stream = new FileStream(path, FileMode.Create))
+            var encoding = Encoding.GetEncoding("UTF-8");
+            
+            using (var stream = new StreamWriter(path, false, encoding))//new FileStream(path, FileMode.Create))
             {
                 serializer.Serialize(stream, config);
             }
@@ -106,7 +108,8 @@ namespace Assets.Scripts.ConfigHandler
             string path = Path.Combine(Application.persistentDataPath, "ConfigFiles/initialConfig.xml");
             if(File.Exists(path))
             {
-                using (var stream = new FileStream(path, FileMode.Open))
+                var encoding = Encoding.GetEncoding("UTF-8");
+                using (var stream = new StreamReader(path,encoding)) //new FileStream(path, FileMode.Open))
                 {             
                         return serializer.Deserialize(stream) as InitialConfigurations;
                 }

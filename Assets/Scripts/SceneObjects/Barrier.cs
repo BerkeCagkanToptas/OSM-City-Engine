@@ -150,10 +150,10 @@ namespace Assets.Scripts.OpenStreetMap
             for (int i = 0; i < way.nodes.Count-1; i++)
             {
 
-                Vector3 differVec = way.nodes[i+1].meterPosition - way.nodes[i].meterPosition;
-                float fenceWidth = differVec.magnitude;
-                int poleCount = (int)Math.Round(fenceWidth / 5.0f) -1;
-                float delta = fenceWidth / (float)(poleCount +1);
+                //Vector3 differVec = way.nodes[i+1].meterPosition - way.nodes[i].meterPosition;
+                //float fenceWidth = differVec.magnitude;
+                //int poleCount = (int)Math.Round(fenceWidth / 5.0f) -1;
+                //float delta = fenceWidth / (float)(poleCount +1);
 
                 GameObject Wall = new GameObject("Wall_" + way.id, typeof(MeshFilter), typeof(MeshRenderer));
                 Wall.transform.parent = BarrierContainer.transform;

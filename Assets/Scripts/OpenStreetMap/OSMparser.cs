@@ -95,15 +95,16 @@ class OSMparser
         nodeList = new List<Node>();
         wayList = new List<Way>();
 
+        StreamReader osmfile = new StreamReader(filename);
 
-        TextAsset osmfile = (TextAsset)Resources.Load(filename, typeof(TextAsset));
-        if(osmfile == null)                  
+        if (osmfile == null)
+        {
             Debug.Log("<color=red>Fatal error:</color>" + filename + " not set");
-            
-        
-      
+            return new OSMXml();
+        }
+     
         XmlDocument xmlfile = new XmlDocument();
-        xmlfile.Load(new StringReader(osmfile.text));
+        xmlfile.Load(osmfile);
 
         foreach (XmlNode node in xmlfile.DocumentElement.ChildNodes)
         {
@@ -139,12 +140,15 @@ class OSMparser
 
     public BBox readBBox(string filename)
     {
-        TextAsset osmfile = (TextAsset)Resources.Load(filename, typeof(TextAsset));
+        //TextAsset osmfile = (TextAsset)Resources.Load(filename, typeof(TextAsset));
+        StreamReader osmfile = new StreamReader(filename);
+
         if (osmfile == null)
             Debug.Log("<color=red>Fatal error:</color>" + filename + " not set");
 
         XmlDocument xmlfile = new XmlDocument();
-        xmlfile.Load(new StringReader(osmfile.text));
+        //xmlfile.Load(new StringReader(osmfile.text));
+        xmlfile.Load(osmfile);
 
         foreach (XmlNode node in xmlfile.DocumentElement.ChildNodes)
         {

@@ -101,9 +101,6 @@ namespace Assets.Scripts.HeightMap
             float left, bottom, right, top;
             double res = geo.Resolution(zoomLevel);
 
-            Vector2 aa = geo.meterstoLatLon(bbox.meterBottom, bbox.meterLeft);
-            Vector2 bb = geo.meterstoLatLon(bbox.meterTop, bbox.meterRight);
-
             left = (float)Math.Round((bbox.meterLeft + geo.originShift) / res) - (mintileCoord.x * tileSize);
             right = (float)Math.Round((bbox.meterRight + geo.originShift) / res) - (mintileCoord.x * tileSize);
 

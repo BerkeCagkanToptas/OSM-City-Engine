@@ -36,14 +36,14 @@ namespace Assets.Scripts.OpenStreetMap
         Material highwayMaterial;
 
         //External Parameters
-        Way way;
+        public Way way;
         myTerrain terrain;
         BBox bbox;
         List<HighwayConfigurations> highwayConfig;
 
         //Vertex Data
-        List<Vector3> leftSideVertexes;
-        List<Vector3> rightSideVertexes;
+        public List<Vector3> leftSideVertexes;
+        public List<Vector3> rightSideVertexes;
         List<Vector3> leftSideIntersections;
         List<Vector3> rightSideIntersections;
 
@@ -59,8 +59,6 @@ namespace Assets.Scripts.OpenStreetMap
             type = getHighwayType(w.tags);
 
             if (type == highwayType.HighwayFootway)
-                return;
-            if (w.id == "192752097")
                 return;
 
             getConfiguration(config);
@@ -85,6 +83,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
+        //Gets highwayType
         private highwayType getHighwayType(List<Tag> tags)
         {
         
@@ -135,6 +134,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
+        //Sets appropriate configuration according to highway type
         private void getConfiguration(List<HighwayConfigurations> config)
         {
          
@@ -527,6 +527,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
+        //This will be used to drape Highway to Terrain Tiles Diagonally
         private void DiagonalDrape()
         {
             TerrainInfo ti = terrain.terrainInfo;
@@ -607,6 +608,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
+        //Create Highway GameObject to Render
         private void createHighway()
         {
             gameObject = new GameObject("Highway" + way.id, typeof(MeshRenderer), typeof(MeshFilter));
@@ -670,7 +672,7 @@ namespace Assets.Scripts.OpenStreetMap
 
         }
 
-
+        //Display Draping pins
         private void createDebugPins()
         {
             GameObject debugSphereContainer = new GameObject("debugSphereContainer");

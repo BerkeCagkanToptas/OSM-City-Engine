@@ -87,16 +87,11 @@ namespace Assets.Scripts.OpenStreetMap
             float top = (float)Math.Ceiling(scenebbox.top) - (topIndex / 1200.0f);
             float bottom = (float)Math.Ceiling(scenebbox.top) - (bottomIndex / 1200.0f);
 
-            Vector2 deneme = geo.LatLontoMeters(bottom, left);
-            Vector2 tiles = geo.MetersToTile(deneme.x, deneme.y, 18);
-
             for (int i = 0; i <= bottomIndex - topIndex; i++)
             {
                 for (int j = 0; j <= rightIndex - leftIndex; j++)
                 {
                     myTerrainHeights[i, j] = heightmap.heightmap[topIndex + i, leftIndex + j];
-                    float lat = top - (i / 1200.0f);
-                    float lon = left + (j / 1200.0f);
                     meterPositions[i , j] =  geo.LatLontoMeters(top - (i / 1200.0f), left + (j / 1200.0f));
                 }
             }
