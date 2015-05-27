@@ -1,17 +1,36 @@
 ## Description: ##
 
-Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes OpenStreetMap Xml file as input and automatically render 2D data into 3D. For terrain rendering, it takes Nasa SRTM3 Data as heightmap and Openstreet/Bingmap tile images as texture. In addition to auto construction, user can edit objects in the scene automatically by using edit menu.
+Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [http://wiki.openstreetmap.org/wiki/OSM_XML](http://wiki.openstreetmap.org/wiki/OSM_XML) file as input and automatically render 2D data into 3D. For terrain rendering, it takes Nasa SRTM3 Data as heightmap and Openstreet/Bingmap tile images as texture. In addition to auto construction, user can edit objects in the scene automatically by using edit menu.
 
 ## What is included: ##
-1. 3D Building Rendering
-2. 3D Highway, Railway, River Rendering
-3. 3D Terrain Rendering
-4. 3D Barrier, Wall, Fence Rendering
-5. 3D Models like Trees, Traffic Lights, Cars etc. support
-6. Geography Library to apply Projection Conversions between UTM(EPSG:4326) and Spherical Mercator(EPSG:3857) 
-6. "Freefly Camera" Mode and  "Car Camera" Modes
-7. Edit Menu
-8. Load/Save 3D scene
+
+Buildings:
+1. 3D Building Rendering from 2D OSM data
+2. Edit Building settings, (Change Textures, Height, Position)
+3. [In Development] Replace building with a 3D Model (with Translate, Scale and Rotate Options)
+
+Highways:
+1. 3D Highway and Railway rendering from 2D OSM data
+2. Add Sidewalk to both side desired
+3. [In Development] Edit Highway Settings (Change highway width, Texture, Enable/Disable sidewalk)
+
+Terrain :
+1. Terrain generated from OSM file bounding box
+2. Automatic heightmap download from Nasa SRTM3
+3. Select Terrain texture from different Tile providers(OpenStreetMap, BingMap)
+
+3D Objects :
+1. Trees and Traffic Lights placed automatically from OSM data
+2. Add new objects (Car, Tree, TrafficSign or any desired model)
+3. Translate, Rotate and Scale Objects
+
+General :
+1. Load/Save Project Option
+2. [In Development] Change Skybox, Sun's Orientation
+
+Incoming Features :
+1. Capture video from car Camera
+2. Laser Scanner to generate Depth Data
 
 ## ScreenShots ##
 
