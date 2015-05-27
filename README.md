@@ -1,35 +1,51 @@
 ## Description: ##
 
-Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [http://wiki.openstreetmap.org/wiki/OSM_XML](http://wiki.openstreetmap.org/wiki/OSM_XML) file as input and automatically render 2D data into 3D. For terrain rendering, it takes Nasa SRTM3 Data as heightmap and Openstreet/Bingmap tile images as texture. In addition to auto construction, user can edit objects in the scene automatically by using edit menu.
+Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [OpenstreetMap XML](http://wiki.openstreetmap.org/wiki/OSM_XML) file as input and automatically construct 3D City from 2D raw data. For terrain rendering, it takes Nasa SRTM3 Data as heightmap and Openstreet/Bingmap tile images as texture. In addition to auto construction, user can add/edit objects in the scene by using edit menu.
 
 ## What is included: ##
 
-Buildings:
+**Buildings:**
+
 1. 3D Building Rendering from 2D OSM data
-2. Edit Building settings, (Change Textures, Height, Position)
+
+2.  Edit Building settings, (Change Textures, Height, Position)
+
 3. [In Development] Replace building with a 3D Model (with Translate, Scale and Rotate Options)
 
-Highways:
+**Highways:**
+
 1. 3D Highway and Railway rendering from 2D OSM data
+
 2. Add Sidewalk to both side desired
+
 3. [In Development] Edit Highway Settings (Change highway width, Texture, Enable/Disable sidewalk)
 
-Terrain :
+**Terrain :**
+
 1. Terrain generated from OSM file bounding box
+
 2. Automatic heightmap download from Nasa SRTM3
+
 3. Select Terrain texture from different Tile providers(OpenStreetMap, BingMap)
 
-3D Objects :
+**3D Objects :**
+
 1. Trees and Traffic Lights placed automatically from OSM data
+
 2. Add new objects (Car, Tree, TrafficSign or any desired model)
+
 3. Translate, Rotate and Scale Objects
 
-General :
+**General :**
+
 1. Load/Save Project Option
+
 2. [In Development] Change Skybox, Sun's Orientation
 
-Incoming Features :
+**Incoming Features :**
+
 1. Capture video from car Camera
+
 2. Laser Scanner to generate Depth Data
 
 ## ScreenShots ##
