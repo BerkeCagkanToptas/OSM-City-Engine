@@ -64,3 +64,14 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 ### 5. Buildings ###
 ![BuildingTextures.png](https://bitbucket.org/repo/nrop7k/images/3162032511-BuildingTextures.png)
+
+## Menus ##
+
+### 1. Load/Save Menu ###
+![LoadSavemenu.png](https://bitbucket.org/repo/nrop7k/images/1500989517-LoadSavemenu.png)
+
+### 2. Default Building Settings Menu ###
+![BuildingSettings.png](https://bitbucket.org/repo/nrop7k/images/366360303-BuildingSettings.png)
+
+### 3. Default Barrier Settings Menu ###
+![BarrierSettings.png](https://bitbucket.org/repo/nrop7k/images/2251909348-BarrierSettings.png)
