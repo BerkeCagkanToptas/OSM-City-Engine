@@ -50,13 +50,13 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 ## ScreenShots ##
 
-### 1. General view of Como City ###
+### 1. General view of Como City (Italy) ###
 ![ss1.png](https://bitbucket.org/repo/nrop7k/images/732983461-ss1.png)
 
-### 2. General view of Como Lake + Brunate ###
+### 2. General view of Como Lake + Brunate (Italy) ###
 ![ss5.png](https://bitbucket.org/repo/nrop7k/images/3428954704-ss5.png)
 
-### 3. Above view of Como + Brunate ###
+### 3. Above view of Como + Brunate (Italy) ###
 ![ss6.png](https://bitbucket.org/repo/nrop7k/images/2707091139-ss6.png)
 
 ### 4. Barrier Types ###
