@@ -48,6 +48,17 @@ namespace Assets.Scripts.Utils
 
 	}
 
+        public static bool getLineIntersection(ref Vector2 intersection, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            Vector2 _p0 = new Vector2(p0.x, p0.z);
+            Vector2 _p1 = new Vector2(p1.x, p1.z);
+            Vector2 _p2 = new Vector2(p2.x, p2.z);
+            Vector2 _p3 = new Vector2(p3.x, p3.z);
+
+            return getLineIntersection(ref intersection, _p0, _p1, _p2, _p3);
+        }
+
+
         public static bool getInfiniteLineIntersection(ref Vector2 intersection, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
 	    {
 		    double A1, B1, C1, A2, B2, C2;
@@ -75,7 +86,21 @@ namespace Assets.Scripts.Utils
 		    return true;
 	    }
 
+        public static bool getVectorIntersection(ref Vector2 intersection,Vector2 p0, Vector2 p1,Vector3 forward1, Vector2 p2, Vector2 p3, Vector3 forward2)
+        {
+            Vector2 p0n = p0 + -100.0f * new Vector2(forward1.x,forward1.z).normalized;
+            Vector2 p1n = p0 + 100.0f * new Vector2(forward1.x, forward1.z).normalized;
+            Vector2 p2n = p2 + -100.0f * new Vector2(forward2.x, forward2.z).normalized;
+            Vector2 p3n = p2 + 100.0f * new Vector2(forward2.x,forward2.z).normalized;
+            return getLineIntersection(ref intersection, p0n, p1n, p2n, p3n);
+        }
 
+        public static bool getHalfVectorIntersection(ref Vector2 intersection, Vector2 p0, Vector2 p1, Vector3 forward1, Vector2 p2, Vector2 p3, Vector3 forward2)
+        {
+            Vector2 p1n = p0 + 100.0f * new Vector2(forward1.x, forward1.z).normalized;
+            Vector2 p3n = p2 + 100.0f * new Vector2(forward2.x, forward2.z).normalized;
+            return getLineIntersection(ref intersection, p0, p1n, p2, p3n);
+        }
 
     }
 }
