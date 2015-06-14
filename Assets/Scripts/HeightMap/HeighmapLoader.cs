@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Assets.Scripts.Utils;
+using Assets.Scripts.OpenStreetMap;
 using System.IO;
 
 namespace Assets.Scripts.HeightMap
@@ -28,7 +29,7 @@ namespace Assets.Scripts.HeightMap
         Australia
     }
 
-    class HeighmapLoader
+    public class HeighmapLoader
     {
         //HeightmapInfo from loaded SRTM data
         //public HeightmapInfo heightMapInfo;

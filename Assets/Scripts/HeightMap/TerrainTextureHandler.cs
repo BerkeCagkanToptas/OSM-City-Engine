@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Assets.Scripts.Utils;
+using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
 using System.IO;
 
@@ -13,8 +14,9 @@ namespace Assets.Scripts.HeightMap
     {
         BingMapAerial,
         BingMapStreet,
+        OpenStreetMap2,
         OpenStreetMap,
-        GoogleMapStreet
+        OpenStreetMapNoLabel
     }
 
    
@@ -27,7 +29,8 @@ namespace Assets.Scripts.HeightMap
 
         public TerrainTextureHandler()
         {
-            zoomLevel = 18;          
+            zoomLevel = 18;   
+
             tileFolder = Application.persistentDataPath + "/Textures/Tiles/";           
                       
             if(!Directory.Exists(tileFolder))
@@ -130,16 +133,21 @@ namespace Assets.Scripts.HeightMap
 
             switch (provider)
             {
-                case MapProvider.GoogleMapStreet:
-                    _URL = "http://mt1.google.com/vt/lyrs=m@157&hl=tr&src=api&x=" + tilex.ToString()
-                            + "&y=" + tiley.ToString() + "&z=" + zoomLevel.ToString() + "&s=Galileo";
-                    savedfileName = savedfileName + ".jpg";
+                case MapProvider.OpenStreetMap2:
+                    _URL = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoomLevel.ToString() + "/" + tilex.ToString() + "/" + tiley.ToString() + ".png";
+                    
+                    savedfileName = savedfileName + ".png";
                     break;
                 case MapProvider.OpenStreetMap:
                     _URL = "http://" + "a" + ".tile.openstreetmap.org/" + zoomLevel.ToString() + "/" + tilex.ToString() + "/" + tiley.ToString() + ".png";
                     savedfileName = savedfileName + ".png";
                     break;
             
+                case MapProvider.OpenStreetMapNoLabel:
+                    _URL = "http://a.tiles.wmflabs.org/osm-no-labels/" + zoomLevel.ToString() + "/" + tilex.ToString() + "/" + tiley.ToString() + ".png";
+                    savedfileName = savedfileName + ".png";
+                    break;
+
                 case MapProvider.BingMapStreet:
                     _URL = "http://ecn.t" + ((tilex + tiley) % 7).ToString() + ".tiles.virtualearth.net/tiles/" + "r";
                     for (int i = zoomLevel - 1; i >= 0; i--)
@@ -164,7 +172,19 @@ namespace Assets.Scripts.HeightMap
                     return null;
             }
 
-            FileDownloader.downloadfromURL(_URL, tileFolder + provider.ToString("G") + "/" + savedfileName);
+            try
+            {
+                FileDownloader.downloadfromURL(_URL, tileFolder + provider.ToString("G") + "/" + savedfileName);
+            }
+            catch
+            {
+                if(provider == MapProvider.OpenStreetMapNoLabel)
+                {
+                    _URL = "http://" + "a" + ".tile.openstreetmap.org/" + zoomLevel.ToString() + "/" + tilex.ToString() + "/" + tiley.ToString() + ".png";
+                    FileDownloader.downloadfromURL(_URL, tileFolder + provider.ToString("G") + "/" + savedfileName);
+                }
+
+            }
 
             byte[] fileData;
             fileData = File.ReadAllBytes(tileFolder + provider.ToString("G") + "/" + savedfileName);
@@ -175,13 +195,6 @@ namespace Assets.Scripts.HeightMap
         }
         private Texture2D CropTexture(Texture2D originalTexture, Rect cropRect)
         {
-            // Make sure the crop rectangle stays within the original Texture dimensions
-            //cropRect.x = Mathf.Clamp(cropRect.x, 0, originalTexture.width);
-            //cropRect.width = Mathf.Clamp(cropRect.width, 0, originalTexture.width - cropRect.x);
-            //cropRect.y = Mathf.Clamp(cropRect.y, 0, originalTexture.height);
-            //cropRect.height = Mathf.Clamp(cropRect.height, 0, originalTexture.height - cropRect.y);
-            //if (cropRect.height <= 0 || cropRect.width <= 0) return null;
-
             int bottom = originalTexture.height - (int)(cropRect.y + cropRect.height);
 
             Texture2D newTexture = new Texture2D((int)cropRect.width, (int)cropRect.height, TextureFormat.RGBA32, false);
