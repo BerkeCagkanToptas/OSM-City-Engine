@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Assets.Scripts.HeightMap;
+using Assets.Scripts.OpenStreetMap;
 using Assets.Scripts.Utils;
 
-namespace Assets.Scripts.OpenStreetMap
+namespace Assets.Scripts.SceneObjects
 {
     public struct TerrainInfo
     {
@@ -39,7 +40,7 @@ namespace Assets.Scripts.OpenStreetMap
     }
 
 
-    class myTerrain
+    public class myTerrain
     {
 
         HeighmapLoader heightmap;
@@ -131,7 +132,7 @@ namespace Assets.Scripts.OpenStreetMap
                     createGrid(i,j);
             }
 
-           
+            drawUnderPlates();
 
         }
 
@@ -220,8 +221,9 @@ namespace Assets.Scripts.OpenStreetMap
 
 
         /// <summary>
-        /// [DEPRECATED] use HighPrecision Triangle Height! interpolate triangle for obtain inner height value in triangle
+        /// interpolates triangle for obtain inner height value in triangle
         /// </summary>
+        [Obsolete("This method is deprecated, please use HighPrecisionTerrainHeight instead.")]
         private float getTerrainTriangleHeight(float meterx, float meterz)
         {
             float finalvalue = 0.0f;
@@ -352,17 +354,17 @@ namespace Assets.Scripts.OpenStreetMap
                 for (int n = j; n <= j + 2; n++)
                 {
                     // read neightbor heights using an arbitrary small offset
-                    Vector3 off = new Vector3(1.0f, 1.0f, 0.0f);
-                    float hL = getTerrainHeight2(terrainInfo.meterPositions[m, n].x - off.x, terrainInfo.meterPositions[m, n].y - off.z);
-                    float hR = getTerrainHeight2(terrainInfo.meterPositions[m, n].x + off.x, terrainInfo.meterPositions[m, n].y + off.z);
-                    float hD = getTerrainHeight2(terrainInfo.meterPositions[m, n].x - off.z, terrainInfo.meterPositions[m, n].y - off.y);
-                    float hU = getTerrainHeight2(terrainInfo.meterPositions[m, n].x + off.z, terrainInfo.meterPositions[m, n].y + off.z);
+                    Vector3 off = new Vector3(5.0f, 5.0f, 5.0f);
+                    float hL = getTerrainHeight2(terrainInfo.meterPositions[m, n].x - off.x, terrainInfo.meterPositions[m, n].y);
+                    float hR = getTerrainHeight2(terrainInfo.meterPositions[m, n].x + off.x, terrainInfo.meterPositions[m, n].y);
+                    float hD = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y - off.z);
+                    float hU = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y + off.z);
                 
                     // deduce terrain normal
                     Vector3 N = new Vector3();
                     N.x = hL - hR;
-                    N.y = hD - hU;
-                    N.z = 2.0f;
+                    N.y = 2.0f;
+                    N.z = hU - hD;
                     N = Vector3.Normalize(N);
                     normals[itr++] = N;
                 }
@@ -408,6 +410,139 @@ namespace Assets.Scripts.OpenStreetMap
             }
 
 
+
+        }
+
+        private void drawUnderPlates()
+        {
+
+            Mesh mesh = new Mesh();
+
+            int length1 = terrainInfo.meterPositions.GetLength(0);
+            int length2 = terrainInfo.meterPositions.GetLength(1);
+
+            Vector3[] vertices = new Vector3[length1 * 4 + length2 *4];
+            int iterator= 0;
+
+
+            //LEFT WALL
+            for(int i = 0 ; i < terrainInfo.meterPositions.GetLength(0) ; i++)
+            {
+                vertices[iterator++] =new Vector3(terrainInfo.meterPositions[i,0].y - terrainInfo.shiftX,
+                                            terrainInfo.terrainHeights[i, 0], 
+                                            terrainInfo.meterPositions[i, 0].x - terrainInfo.shiftZ);            
+            }
+
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(0); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[i, 0].y - terrainInfo.shiftX,
+                                            0,
+                                            terrainInfo.meterPositions[i, 0].x - terrainInfo.shiftZ);
+            }
+
+            //RIGHT WALL
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(0); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[i, length2-1].y - terrainInfo.shiftX,
+                                            terrainInfo.terrainHeights[i, length2-1],
+                                            terrainInfo.meterPositions[i, length2-1].x - terrainInfo.shiftZ);
+            }
+
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(0); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[i, length2-1].y - terrainInfo.shiftX,
+                                            0,
+                                            terrainInfo.meterPositions[i, length2-1].x - terrainInfo.shiftZ);
+            }
+
+
+            //TOP WALL
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(1); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[0, i].y - terrainInfo.shiftX,
+                                            terrainInfo.terrainHeights[0, i],
+                                            terrainInfo.meterPositions[0, i].x - terrainInfo.shiftZ);
+            }
+
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(1); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[0, i].y - terrainInfo.shiftX,
+                                            0,
+                                            terrainInfo.meterPositions[0, i].x - terrainInfo.shiftZ);
+            }
+
+            //BOTTOM WALL
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(1); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[length1-1, i].y - terrainInfo.shiftX,
+                                            terrainInfo.terrainHeights[length1 -1, i],
+                                            terrainInfo.meterPositions[length1-1, i].x - terrainInfo.shiftZ);
+            }
+
+            for (int i = 0; i < terrainInfo.meterPositions.GetLength(1); i++)
+            {
+                vertices[iterator++] = new Vector3(terrainInfo.meterPositions[length1 -1, i].y - terrainInfo.shiftX,
+                                            0,
+                                            terrainInfo.meterPositions[length1 -1 , i].x - terrainInfo.shiftZ);
+            }
+
+
+            int[] triangles = new int[(length1+length2-2)*12];
+            iterator = 0;
+
+            //LEFT WALL
+            for(int i = 0 ; i < length1-1 ; i++ )
+            {
+                triangles[iterator++] = i;
+                triangles[iterator++] = i + 1;
+                triangles[iterator++] = length1 + i + 1;
+                triangles[iterator++] = length1 + i + 1;
+                triangles[iterator++] = length1 + i;
+                triangles[iterator++] = i;
+            }
+            //RIGHT WALL
+            for (int i = 2 * length1; i < 2 * length1 + length1 - 1; i++)
+            {
+                triangles[iterator++] = i + 1;
+                triangles[iterator++] = i;
+                triangles[iterator++] = length1 + i;
+                triangles[iterator++] = length1 + i;
+                triangles[iterator++] = length1 + i +1;
+                triangles[iterator++] = i + 1;
+            }
+            //TOP WALL
+            for (int i = 4 * length1; i < 4 * length1 + length2 - 1; i++)
+            {
+                triangles[iterator++] = i+1;
+                triangles[iterator++] = i;
+                triangles[iterator++] = length2 + i;
+                triangles[iterator++] = length2 + i;
+                triangles[iterator++] = length2 + i+1;
+                triangles[iterator++] = i+1;
+            }
+
+            //BOTTOM WALL
+            for (int i = 4 * length1 + 2 * length2; i < 4 * length1 + 2 * length2 + length2 - 1; i++)
+            {
+                triangles[iterator++] = i;
+                triangles[iterator++] = i + 1;
+                triangles[iterator++] = length2 + i + 1;
+                triangles[iterator++] = length2 + i + 1;
+                triangles[iterator++] = length2 + i;
+                triangles[iterator++] = i;
+            }
+
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+
+            GameObject downsideWalls = new GameObject("Walls", typeof(MeshRenderer), typeof(MeshFilter));
+            downsideWalls.transform.parent = terrainObject.transform;
+
+            MeshRenderer meshRenderer = downsideWalls.GetComponent<MeshRenderer>();
+            meshRenderer.material = new Material(Shader.Find("Standard"));
+
+            MeshFilter meshFilter = downsideWalls.GetComponent<MeshFilter>();
+            meshFilter.mesh = mesh;
 
         }
 

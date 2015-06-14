@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Assets.Scripts.ConfigHandler;
+using Assets.Scripts.OpenStreetMap;
 
-namespace Assets.Scripts.OpenStreetMap
+namespace Assets.Scripts.SceneObjects
 {
 
     public enum areaType

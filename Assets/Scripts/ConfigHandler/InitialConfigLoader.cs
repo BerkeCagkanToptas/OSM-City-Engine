@@ -15,8 +15,16 @@ namespace Assets.Scripts.ConfigHandler
        public string type;
        [XmlAttribute("size")]
        public float size;
-       [XmlAttribute("materialPath")]
+       [XmlElement("materialPath")]
        public string materialPath;
+       [XmlElement("hasLeftSideWalk")]
+       public bool leftSidewalk;
+       [XmlElement("hasRightSideWalk")]
+       public bool rightSidewalk;
+       [XmlElement("LeftSideWalkSize")]
+       public float leftSidewalkSize;
+       [XmlElement("RightSideWalkSize")]
+       public float rightSidewalkSize;
     }
 
     public class RiverConfigurations
@@ -29,22 +37,31 @@ namespace Assets.Scripts.ConfigHandler
 
     public class BuildingMaterial
     {
+        [XmlAttribute("isActive")]
+        public bool isActive;
         [XmlAttribute("name")]
         public string name;
-        [XmlAttribute("materialPath")]
-        public string materialPath;
-        [XmlAttribute("width")]
+
+        [XmlElement("textureWidth")]
         public float width;
+        [XmlElement("colorTextPath")]
+        public string colorTexturePath;
+        [XmlElement("normalTextPath")]
+        public string normalTexturePath;
+        [XmlElement("specularTextPath")]
+        public string specularTexturePath;
     }
 
     public class BuildingConfigurations
     {
-        public float height;
+        public float minheight, maxheight;
         public Vector3 defaultColor;
 
         [XmlArray("defaultSkins")]
         [XmlArrayItem("Skin")]
         public List<BuildingMaterial> defaultSkins;
+       
+
     }
 
     public class AreaConfigurations
@@ -94,7 +111,10 @@ namespace Assets.Scripts.ConfigHandler
         {
             var serializer = new XmlSerializer(typeof(InitialConfigurations));
             var encoding = Encoding.GetEncoding("UTF-8");
-            
+
+            if (File.Exists(path))
+                File.Delete(path);
+
             using (var stream = new StreamWriter(path, false, encoding))//new FileStream(path, FileMode.Create))
             {
                 serializer.Serialize(stream, config);
@@ -140,7 +160,7 @@ namespace Assets.Scripts.ConfigHandler
             "Materials/Highway/Mat_Service", "Materials/Highway/Mat_Path", "Materials/Highway/Mat_Footway",
             "Materials/Highway/Mat_Pavement", "Materials/Highway/Mat_Railway","Materials/Highway/Mat_River" };
 
-            for(int k=0 ; k < highwaySizes.Length ; k++)
+            for(int k=0 ; k < highwayTypes.Length ; k++)
             {
                 HighwayConfigurations hc = new HighwayConfigurations();
                 hc.size = highwaySizes[k];
@@ -149,24 +169,24 @@ namespace Assets.Scripts.ConfigHandler
                 config.highwayConfig.Add(hc);
             }
 
-            //RIVER CONFIGURATIONS
+            //RIVER CONFIGURATIONS [NOT USED]
             config.riverConfig = new RiverConfigurations();
             config.riverConfig.materialPath = "Materials/River/??";
             config.riverConfig.size = 6.0f;
 
-            //AREA CONFIGURATIONS
+            //AREA CONFIGURATIONS [NOT USED]
             config.areaConfig = new AreaConfigurations();
             config.areaConfig.defaultColor = new Vector3(0.3f, 0.3f, 0.3f);
 
             //BARRIER CONFIGURATIONS
             config.barrierConfig = new List<BarrierConfigurations>();
 
-            float[] barrierHeight = new float[] {2.0f,2.0f,15.0f,15.0f,2.0f,2.0f };
-            float[] barrierWidth = new float[] { 0.1f,0.2f,2.0f,2.0f,0.2f,0.2f };
-            string[] barrierTypes = new string[]{"fence", "wall", "cityWall", "cityGate", "gate", "retaining_wall"};
-            string[] barrierPrefabs = new string[]{"Prefabs/Barrier/Fence/fencePrefab", "Materials/Barrier/BrickWall",
-                                        "Materials/Barrier/CityWall", "Materials/Barrier/CityGate", 
-                                        "Materials/Barrier/Gate", "Materials/Barrier/RetainingWall"};
+            float[] barrierHeight = new float[] {2.0f,1.5f,15.0f,3.0f, 2.0f };
+            float[] barrierWidth = new float[] { 0.1f,0.3f,3.0f,0.3f, 0.5f };
+            string[] barrierTypes = new string[]{"Fence", "Wall", "City Wall", "Retaining Wall", "Default"};
+            string[] barrierPrefabs = new string[]{"Materials/Barrier/chainlink", "Materials/Barrier/BrickWall",
+                                                   "Materials/Barrier/CityWall", "Materials/Barrier/RetainingWall", 
+                                                   "Materials/Barrier/Default"};
             for (int k = 0; k < barrierTypes.Length; k++)
             {
                 BarrierConfigurations bar = new BarrierConfigurations();
@@ -180,25 +200,54 @@ namespace Assets.Scripts.ConfigHandler
             //BUILDING CONFIGURATIONS
             config.buildingConfig = new BuildingConfigurations();
             config.buildingConfig.defaultColor = new Vector3(0.5f, 0.5f, 0.5f);
-            config.buildingConfig.height = 15.0f;
+            config.buildingConfig.minheight = 15.0f;
+            config.buildingConfig.maxheight = 15.0f;
             config.buildingConfig.defaultSkins = new List<BuildingMaterial>();
 
-            string[] skinNames = new string[] {"WhiteConcrete","DarkBrick","LightBrick","WhiteConcrete2","DarkBrick2", "StoneTower", "Kiosk"};
-            float[] skinSizes = new float[] {16.0f,16.0f,12.0f,8.0f,8.0f,30.0f,0.0f};
-            string[] skinMaterials = new string[] {"Materials/Building/Mat_BuildingDefault1","Materials/Building/Mat_BuildingDefault2",
-            "Materials/Building/Mat_BuildingDefault3","Materials/Building/Mat_BuildingDefault4",
-            "Materials/Building/Mat_BuildingDefault5","Materials/Building/Mat_BuildingTower",
-            "Materials/Building/Mat_BuildingTower"};
+            string[] skinNames = new string[] {"White Concrete","Dark Brick","Light Brick","White Concrete 2","Dark Brick 2", "Stone Tower", "Kiosk"};
+            float[] skinSizes = new float[] {16.0f,16.0f,12.0f,8.0f,8.0f,30.0f,2.0f};
+            List<string> colorTexturePath = new List<string>();
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture1.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture2.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture3.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture4.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture5.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/towerTexture.jpg");
+            colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/KioskTexture.jpg");
+
+            List<string> normalTexturePath = new List<string>();
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building1Normal.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building2Normal.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building3Normal.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building4Normal.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building5Normal.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/NormalMapTower.png");
+            normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/NormalMapKiosk.png");
+
+            List<string> specularTexturePath = new List<string>();
+            specularTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building1Specular.png");
+            specularTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building2Specular.png");
+            specularTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building3Specular.png");
+            specularTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/Building4Specular.png");
+            specularTexturePath.Add("");
+            specularTexturePath.Add("");
+            specularTexturePath.Add("");
 
             for (int k = 0; k < skinNames.Length; k++)
             {
                 BuildingMaterial mat = new BuildingMaterial();
                 mat.name = skinNames[k];
                 mat.width = skinSizes[k];
-                mat.materialPath = skinMaterials[k];
+                mat.colorTexturePath = colorTexturePath[k];
+                mat.normalTexturePath = normalTexturePath[k];
+                mat.specularTexturePath = specularTexturePath[k];
+                mat.isActive = true;
+
                 config.buildingConfig.defaultSkins.Add(mat);
             }
 
+            config.buildingConfig.defaultSkins[5].isActive = false;
+            config.buildingConfig.defaultSkins[6].isActive = false;
 
             return config;
 

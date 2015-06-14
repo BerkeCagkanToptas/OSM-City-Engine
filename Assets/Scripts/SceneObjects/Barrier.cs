@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Assets.Scripts.ConfigHandler;
+using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
 
-namespace Assets.Scripts.OpenStreetMap
+namespace Assets.Scripts.SceneObjects
 {
     enum BarrierType
     {
@@ -70,18 +71,17 @@ namespace Assets.Scripts.OpenStreetMap
         {
             switch(type)
             {
-                case BarrierType.cityGate:
-                    return configs[3];
-                case BarrierType.cityWall:
-                    return configs[2];
                 case BarrierType.fence:
                     return configs[0];
-                case BarrierType.gate:
-                    return configs[4];
-                case BarrierType.retaining_wall:
-                    return configs[5];
                 case BarrierType.wall:
                     return configs[1];
+                case BarrierType.cityWall:
+                    return configs[2];
+                case BarrierType.retaining_wall:
+                    return configs[3];
+                case BarrierType.none:
+                    return configs[4];
+
             }
             return new BarrierConfigurations();
         }
@@ -126,7 +126,7 @@ namespace Assets.Scripts.OpenStreetMap
                 meshFilter.mesh = mesh;
 
                 MeshRenderer meshRenderer = fencePlane.GetComponent<MeshRenderer>();
-                meshRenderer.material = (Material)Resources.Load("Materials/Barrier/chainlink");
+                meshRenderer.material = (Material)Resources.Load(barrierConfig.Path);
                 BarrierElements.Add(fencePlane);
             }            
 
@@ -149,11 +149,6 @@ namespace Assets.Scripts.OpenStreetMap
 
             for (int i = 0; i < way.nodes.Count-1; i++)
             {
-
-                //Vector3 differVec = way.nodes[i+1].meterPosition - way.nodes[i].meterPosition;
-                //float fenceWidth = differVec.magnitude;
-                //int poleCount = (int)Math.Round(fenceWidth / 5.0f) -1;
-                //float delta = fenceWidth / (float)(poleCount +1);
 
                 GameObject Wall = new GameObject("Wall_" + way.id, typeof(MeshFilter), typeof(MeshRenderer));
                 Wall.transform.parent = BarrierContainer.transform;
@@ -236,6 +231,7 @@ namespace Assets.Scripts.OpenStreetMap
                     generateWall(way);
                     break;
                 default :
+                    generateWall(way);
                     break;
             }
         }

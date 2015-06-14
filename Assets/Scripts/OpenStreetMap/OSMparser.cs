@@ -7,7 +7,7 @@ using UnityEngine;
 using System.Xml;
 using System.IO;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.OpenStreetMap
 {
 
 
@@ -24,6 +24,16 @@ public struct Node
     public float height;
     public Vector3 meterPosition;
 	public List<Tag> tags;
+
+    public Node(Node nd)
+    {
+        this.id = nd.id;
+        this.lat = nd.lat;
+        this.lon = nd.lon;
+        this.height = nd.height;
+        this.meterPosition = nd.meterPosition;
+        this.tags = nd.tags;
+    }
 }
 
 public struct Member
@@ -58,6 +68,20 @@ public struct Way
 	public List<Node> nodes;
 	//tags of way
     public List<Tag> tags;
+
+    public Way(Way w)
+    {
+        this.id = w.id;
+        this.isArea = w.isArea;
+        this.tags = new List<Tag>();
+        this.nodes = new List<Node>();
+
+        for(int i = 0 ; i < w.tags.Count ; i++)        
+            this.tags.Add(w.tags[i]);
+        
+        for(int i = 0 ; i < w.nodes.Count; i++)        
+            this.nodes.Add(new Node(w.nodes[i]));
+    }
 };
 
 public struct BBox
@@ -217,7 +241,7 @@ class OSMparser
             if(child.Name == "nd")
             {
                 string refid = child.Attributes[0].Value;
-                w.nodes.Add(findNode(refid));
+                w.nodes.Add(nodeList.Find(item => item.id == refid));
             }
             else if (child.Name == "tag")
             {
@@ -274,16 +298,6 @@ class OSMparser
                 tg.v = a.Value;
         }
         return tg;
-    }
-
-    private Node findNode(string refid)
-    {
-        for(int i=0 ; i < nodeList.Count ; i++)
-        {
-            if (nodeList[i].id == refid)
-                return nodeList[i];
-        }
-        return new Node();
     }
 
     private BuildingRelation generateBuildingRelation(Relation relation)

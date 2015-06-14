@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Assets.Scripts.Utils;
 using UnityEngine.UI;
-using Assets.Scripts.OpenStreetMap;
+using Assets.Scripts.SceneObjects;
 using Assets.Scripts.HeightMap;
 using System.IO;
 
@@ -83,21 +83,30 @@ public class LoadSaveMenu : MonoBehaviour
     {
         Scene scene = new Scene();
 
-        GameObject osmToggle = GameObject.Find("Toggle_OpenStreetMap");
-        GameObject bingToggle = GameObject.Find("Toggle_BingMap");
-        Toggle Tog_osm = osmToggle.GetComponent<Toggle>();
-        Toggle Tog_bing = bingToggle.GetComponent<Toggle>();
+        Toggle osmStreetToggle = GameObject.Find("Toggle_OSMStreet").GetComponent<Toggle>();
+        Toggle osmStreet2Toggle = GameObject.Find("Toggle_OSMStreet2").GetComponent<Toggle>();
+        Toggle bingStreetToggle = GameObject.Find("Toggle_BingStreet").GetComponent<Toggle>();
+        Toggle bingAerialToggle = GameObject.Find("Toggle_BingAerial").GetComponent<Toggle>();
 
-        MapProvider provider = MapProvider.OpenStreetMap;
 
-        if (Tog_osm.isOn)
+        MapProvider provider;
+
+        if (osmStreetToggle.isOn)
             provider = MapProvider.OpenStreetMap;
-        else if (Tog_bing)
+        else if (osmStreet2Toggle.isOn)
+            provider = MapProvider.OpenStreetMap2;
+        else if (bingStreetToggle.isOn)
+            provider = MapProvider.BingMapStreet;
+        else
             provider = MapProvider.BingMapAerial;
 
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
         string extension = Path.GetExtension(_if.text);
         if((extension == ".xml" || extension == ".osm") && File.Exists(_if.text))
             scene.initializeScene(_if.text, HeightmapContinent.Eurasia, provider);
+        stopwatch.Stop();
+        Debug.Log("<color=blue>TOTAL TIME:</color>" + stopwatch.ElapsedMilliseconds);
     }
 
     public void ClickLoadProjectRender()

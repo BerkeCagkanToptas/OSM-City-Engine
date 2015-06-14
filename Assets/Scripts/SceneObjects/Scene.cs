@@ -5,9 +5,11 @@ using System.Text;
 using Assets.Scripts.HeightMap;
 using Assets.Scripts.Utils;
 using Assets.Scripts.ConfigHandler;
+using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
+using System.IO;
 
-namespace Assets.Scripts.OpenStreetMap
+namespace Assets.Scripts.SceneObjects
 {
 
     enum wayType
@@ -24,9 +26,16 @@ namespace Assets.Scripts.OpenStreetMap
     class Scene
     {
         public BBox scenebbox;
-        public List<Building> buildingList;
+        
         public List<Area> areaList;
+
         public List<Highway> highwayList;
+        private List<Way> WayListforHighway;
+
+        public List<Building> buildingList;
+        private List<Way> WayListforBuilding;
+        private List<BuildingRelation> RelationListforBuilding;
+
         public List<Barrier> barrierList;
         public List<GameObject> treeList;
         public List<GameObject> trafficLightList;
@@ -38,11 +47,13 @@ namespace Assets.Scripts.OpenStreetMap
 
         private InitialConfigLoader configloader;
 
+
         public Scene()
         {
             buildingList = new List<Building>();
             areaList = new List<Area>();
-            highwayList = new List<Highway>();
+            WayListforHighway = new List<Way>();
+            WayListforBuilding = new List<Way>();
             barrierList = new List<Barrier>();
             treeList = new List<GameObject>();
             trafficLightList = new List<GameObject>();
@@ -61,24 +72,20 @@ namespace Assets.Scripts.OpenStreetMap
         /// Choose mapProvider to select Texture of Terrain
         public void initializeScene(string OSMfilename, HeightmapContinent continent, MapProvider provider)
         {
+ 
             OSMparser parser = new OSMparser();
             scenebbox = parser.readBBox(OSMfilename);
             scenebbox = editbbox(scenebbox);
             config = configloader.loadInitialConfig();
-            
-            heightMap = new HeighmapLoader(scenebbox,continent);
-            terrain = new myTerrain(heightMap, scenebbox, OSMfilename, provider);
 
+            heightMap = new HeighmapLoader(scenebbox, continent);
+            terrain = new myTerrain(heightMap, scenebbox, OSMfilename, provider);
             osmxml = parser.parseOSM(OSMfilename);
             assignNodePositions();
 
+
             drawTrees(osmxml.treeList);
 
-            for (int k = 0; k < osmxml.buildingRelations.Count;k++)
-            {
-                //continue;
-                buildingList.Add(new Building(osmxml.buildingRelations[k], config.buildingConfig));
-            }
 
             for (int k = 0; k < osmxml.wayList.Count; k++)
             {
@@ -87,15 +94,12 @@ namespace Assets.Scripts.OpenStreetMap
                 switch (getWayTpe(w))
                 {
                     case wayType.building:
-                        //continue;
-                        if (!isDuplicateBuilding(w.id))
-                            buildingList.Add(new Building(w, config.buildingConfig));
+                        WayListforBuilding.Add(w);     
                         break;
-                    case wayType.highway:                     
-                            highwayList.Add(new Highway(w, config.highwayConfig,terrain));
+                    case wayType.highway:
+                        WayListforHighway.Add(w);
                         break;
                     case wayType.area:
-                        //continue;
                         areaList.Add(new Area(w, config.areaConfig));
                         break;
                     case wayType.barrier:
@@ -109,8 +113,20 @@ namespace Assets.Scripts.OpenStreetMap
                 }
             }
 
+            //HighwayListModeller highwayListModeller = new HighwayListModeller(WayListforHighway, terrain, config.highwayConfig);
+            //highwayListModeller.renderHighwayList();
+            //highwayList = highwayListModeller.highwayList;
 
-             Debug.Log("<color=red>Scene Info:</color> BuildingCount:" + buildingList.Count.ToString() + " HighwayCount:" + highwayList.Count);
+            HighwayModeller highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
+            highwayModeller.renderHighwayList();
+            highwayList = highwayModeller.highwayList;
+
+            BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
+            buildingListModeller.renderBuildingList();
+            buildingList = buildingListModeller.buildingList;
+
+           
+            Debug.Log("<color=red>Scene Info:</color> BuildingCount:" + buildingList.Count.ToString() + " HighwayCount:" + highwayList.Count);
 
         }
 
@@ -127,7 +143,12 @@ namespace Assets.Scripts.OpenStreetMap
                 else if (t.k == "barrier")
                     return wayType.barrier;
                 else if (t.k == "highway" || t.k == "railway")
+                {
+                    if (t.v == "footway")
+                        return wayType.none;
+
                     return wayType.highway;
+                }
                 else if (t.k == "landuse" || t.k == "leisure")
                     return wayType.area;
                 else if (t.k == "amenity")
@@ -223,15 +244,7 @@ namespace Assets.Scripts.OpenStreetMap
             }
         }
 
-        //For relation building : check for duplicate with normal building 
-        private bool isDuplicateBuilding(string id)
-        {
-            for (int k = 0; k < osmxml.relationList.Count; k++)
-                if (id == osmxml.relationList[k].id)
-                    return true;
 
-            return false;
 
-        }
     }
 }
