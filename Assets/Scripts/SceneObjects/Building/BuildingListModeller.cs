@@ -6,23 +6,17 @@ using UnityEngine;
 using Assets.Scripts.ConfigHandler;
 using Assets.Scripts.OpenStreetMap;
 using System.IO;
+using Assets.Scripts.Utils;
 
 namespace Assets.Scripts.SceneObjects
 {
     class BuildingListModeller
     {
         private List<Material> materialList;
-
         public List<Building> buildingList;
-
-        List<Way> buildingWayList;
-        List<BuildingRelation> buildingRelationList;
-
 
         public BuildingListModeller(List<Way> buildingWay, List<BuildingRelation> buildingRelation, BuildingConfigurations config)
         {
-            buildingWayList = buildingWay;
-            buildingRelationList = buildingRelation;
             setMaterialList(config);
 
 
@@ -31,8 +25,9 @@ namespace Assets.Scripts.SceneObjects
             for (int i = 0; i < buildingRelation.Count; i++)
             {
                 float materialtexWidth = 10;
-                Material mat = getMaterial(buildingRelation[i].tags, config, ref materialtexWidth);
-                buildingList.Add(new Building(buildingRelation[i], config,mat,materialtexWidth));
+                int materialID = -1;
+                Material mat = getMaterial(buildingRelation[i].tags, config, ref materialtexWidth, ref materialID);
+                buildingList.Add(new Building(buildingRelation[i], config,mat,materialID, materialtexWidth));
               
             }
             for (int i = 0; i < buildingWay.Count; i++)
@@ -40,13 +35,43 @@ namespace Assets.Scripts.SceneObjects
                 if(!buildingList.Exists(item => item.id == buildingWay[i].id))
                 {
                     float materialtexWidth = 10;
-                    Material mat = getMaterial(buildingWay[i].tags, config, ref materialtexWidth);
-                    buildingList.Add(new Building(buildingWay[i], config, mat, materialtexWidth));
+                    int materialID = -1;
+                    Material mat = getMaterial(buildingWay[i].tags, config, ref materialtexWidth, ref materialID);
+                    buildingList.Add(new Building(buildingWay[i], config, mat,materialID, materialtexWidth));
                 }
                     
             }
 
         }
+
+        public BuildingListModeller(List<Way> buildingWay, List<BuildingRelation> buildingRelation, BuildingConfigurations config, List<HighwaySave> highwaySave)
+        {
+            setMaterialList(config);
+
+            buildingList = new List<Building>();
+
+            for (int i = 0; i < buildingRelation.Count; i++)
+            {
+                float materialtexWidth = 10;
+                int materialID = -1;
+                Material mat = getMaterial(buildingRelation[i].tags, config, ref materialtexWidth, ref materialID);
+                buildingList.Add(new Building(buildingRelation[i], config, mat, materialID, materialtexWidth));
+
+            }
+            for (int i = 0; i < buildingWay.Count; i++)
+            {
+                if (!buildingList.Exists(item => item.id == buildingWay[i].id))
+                {
+                    float materialtexWidth = 10;
+                    int materialID = -1;
+                    Material mat = getMaterial(buildingWay[i].tags, config, ref materialtexWidth, ref materialID);
+                    buildingList.Add(new Building(buildingWay[i], config, mat, materialID, materialtexWidth));
+                }
+
+            }
+
+        }
+
 
         public void renderBuildingList()
         {
@@ -56,7 +81,7 @@ namespace Assets.Scripts.SceneObjects
             }         
         }
 
-        private Material getMaterial(List<Tag> tagList, BuildingConfigurations config, ref float matWidth)
+        private Material getMaterial(List<Tag> tagList, BuildingConfigurations config, ref float matWidth, ref int matID)
         {
 
             int skinindex;
@@ -64,16 +89,21 @@ namespace Assets.Scripts.SceneObjects
             for (int i = 0; i < tagList.Count; i++)
             {
                 if (tagList[i].k == "man_made" && tagList[i].v == "tower")
-                {
-                    matWidth = config.defaultSkins[5].width;
-                    return materialList[5];              
+                {                    
+                    skinindex = config.defaultSkins.FindIndex(item=> item.name == "Antic Stones");
+                    matWidth = config.defaultSkins[skinindex].width;
+                    matID = skinindex;
+                    return materialList[skinindex];              
                 }
                 if (tagList[i].k == "shop" && tagList[i].v == "kiosk")
                 {
-                    matWidth = config.defaultSkins[6].width;
-                    return materialList[6];
+                    skinindex = config.defaultSkins.FindIndex(item => item.name == "Kiosk");
+                    matWidth = config.defaultSkins[skinindex].width;
+                    matID = skinindex;
+                    return materialList[skinindex];
                 }
             }
+
 
             do
             {
@@ -82,52 +112,20 @@ namespace Assets.Scripts.SceneObjects
             while (!config.defaultSkins[skinindex].isActive);
 
             matWidth = config.defaultSkins[skinindex].width;
+            matID = skinindex;
             return materialList[skinindex];
-
         }
 
 
         private  void setMaterialList(BuildingConfigurations buildingConfig)
         {
             materialList = new List<Material>();
-
+          
             for (int k = 0; k < buildingConfig.defaultSkins.Count; k++)
             {
-
-                Material matBuilding = (Material)Resources.Load("Materials/Building/Mat_DefaultPrefab", typeof(Material));
-                Material mat = new Material(matBuilding);
-                Texture2D colortex;
-                Texture2D normaltex;
-                Texture2D speculartex;
-
-                byte[] fileData;
-
-                if (buildingConfig.defaultSkins[k].colorTexturePath != "")
-                {
-                    fileData = File.ReadAllBytes(buildingConfig.defaultSkins[k].colorTexturePath);
-                    colortex = new Texture2D(2, 2);
-                    colortex.LoadImage(fileData);
-                    mat.SetTexture("_MainTex", colortex);
-                }
-
-                if (buildingConfig.defaultSkins[k].normalTexturePath != "")
-                {
-                    fileData = File.ReadAllBytes(buildingConfig.defaultSkins[k].normalTexturePath);
-                    normaltex = new Texture2D(2, 2);
-                    normaltex.LoadImage(fileData);
-                    mat.SetTexture("_BumpMap", normaltex);
-                }
-
-                if (buildingConfig.defaultSkins[k].specularTexturePath != "")
-                {
-                    fileData = File.ReadAllBytes(buildingConfig.defaultSkins[k].specularTexturePath);
-                    speculartex = new Texture2D(2, 2);
-                    speculartex.LoadImage(fileData);
-                    mat.SetTexture("_SpecGlossMap", speculartex);
-                }
-
+                BuildingMaterial bmat = buildingConfig.defaultSkins[k];
+                Material mat = InGameTextureHandler.createMaterial(bmat.colorTexturePath, bmat.normalTexturePath, bmat.specularTexturePath);
                 materialList.Add(mat);
-
             }
 
         }

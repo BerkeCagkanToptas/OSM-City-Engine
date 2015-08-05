@@ -200,12 +200,43 @@ namespace Assets.Scripts.ConfigHandler
             //BUILDING CONFIGURATIONS
             config.buildingConfig = new BuildingConfigurations();
             config.buildingConfig.defaultColor = new Vector3(0.5f, 0.5f, 0.5f);
-            config.buildingConfig.minheight = 15.0f;
-            config.buildingConfig.maxheight = 15.0f;
+            config.buildingConfig.minheight = 14.0f;
+            config.buildingConfig.maxheight = 18.0f;
             config.buildingConfig.defaultSkins = new List<BuildingMaterial>();
 
-            string[] skinNames = new string[] {"White Concrete","Dark Brick","Light Brick","White Concrete 2","Dark Brick 2", "Stone Tower", "Kiosk"};
-            float[] skinSizes = new float[] {16.0f,16.0f,12.0f,8.0f,8.0f,30.0f,2.0f};
+            List<string> skinNames = new List<string>();
+            skinNames.Add("White Concrete");
+            skinNames.Add("Dark Brick");
+            skinNames.Add("Light Brick");
+            skinNames.Add("White Concrete 2");
+            skinNames.Add("Dark Brick 2");
+            skinNames.Add("Antic Stones");
+            skinNames.Add("Kiosk");
+            //---------------------
+            skinNames.Add("White Historic");
+            skinNames.Add("Yellow-Orrange Concrete");
+            skinNames.Add("Wide Historic");
+            skinNames.Add("Old Concrete 2-floor");
+            skinNames.Add("Old Stone");
+            skinNames.Add("White Stone");
+            skinNames.Add("White Concrete 3");
+            skinNames.Add("Brick");
+            skinNames.Add("Old Concrete with Shop");
+            skinNames.Add("Brick 2");
+            skinNames.Add("Old Concrete");
+            skinNames.Add("Yellow Historic");
+            skinNames.Add("Yellow Concrete with Shop");
+            skinNames.Add("Brown-White Concrete");
+            skinNames.Add("Orange Wide");
+            skinNames.Add("White Stone 2");
+            skinNames.Add("White Stone Modern");
+            skinNames.Add("White Concrete Modern");
+            skinNames.Add("Office Type");
+            skinNames.Add("White Concrete 4");
+
+            float[] skinSizes = new float[] { 16.0f, 16.0f, 12.0f, 8.0f, 8.0f,30.0f,2.0f, 12.0f, 20.0f, 24.0f, 8.0f, 16.0f, 8.0f, 8.0f, 8.0f, 12.0f, 16.0f, 16.0f, 16.0f, 12.0f, 16.0f, 24.0f, 12.0f, 16.0f, 20.0f, 16.0f, 16.0f };
+
+            //float[] skinSizes = new float[] {16.0f,16.0f,12.0f,8.0f,8.0f,30.0f,2.0f};
             List<string> colorTexturePath = new List<string>();
             colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture1.jpg");
             colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Building/buildingTexture2.jpg");
@@ -233,7 +264,15 @@ namespace Assets.Scripts.ConfigHandler
             specularTexturePath.Add("");
             specularTexturePath.Add("");
 
-            for (int k = 0; k < skinNames.Length; k++)
+
+            for (int i = 1; i <= 20; i++)
+            {
+                colorTexturePath.Add(Application.dataPath + "/Resources/Textures/Buildings/ColorTex/BuildingTexture" + i + "_COLOR.png");
+                normalTexturePath.Add(Application.dataPath + "/Resources/Textures/Buildings/NormalTex/BuildingTexture" + i + "_NRM.png");
+                specularTexturePath.Add(Application.dataPath + "/Resources/Textures/Buildings/SpecularTex/BuildingTexture" + i + "_SPEC.png");
+            }
+
+            for (int k = 0; k < skinNames.Count; k++)
             {
                 BuildingMaterial mat = new BuildingMaterial();
                 mat.name = skinNames[k];

@@ -7,6 +7,7 @@ using Assets.Scripts.ConfigHandler;
 using Assets.Scripts.Utils;
 using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
 
 
 namespace Assets.Scripts.SceneObjects
@@ -51,6 +52,9 @@ namespace Assets.Scripts.SceneObjects
             public List<IntersectionType> intersectionTypes;
             public List<string> wayIds;
 
+            public List<Object3D> trafficLights;
+            public GameObject intersectionHole;
+
             public int count;
             public bool hasRoadDivision;
         }
@@ -62,6 +66,7 @@ namespace Assets.Scripts.SceneObjects
         }
 
         public List<Highway> highwayList;
+        public List<Pavement> pavementList;        
         private List<IntersectionNode> intersections;
 
         protected myTerrain terrain;
@@ -73,22 +78,31 @@ namespace Assets.Scripts.SceneObjects
         {
             wayList = _wayList;
             highwayList = new List<Highway>();
+            pavementList = new List<Pavement>();
             terrain = _terrain;
             configurations = _configurations;
             generateHighwayList();
+            generatePavementList();
         }
-
-
         public void renderHighwayList()
         {
             for (int i = 0; i < highwayList.Count; i++)
                 highwayList[i].renderHighway();
         }
+        public void renderPavementList()
+        {
+            for (int i = 0; i < pavementList.Count; i++)
+                pavementList[i].renderPavement();
 
+            for (int i = 0; i < pavementList.Count; i++)
+            {
+                correctPavement(pavementList[i].Pavementid, Pavement.pavementSide.left);
+                correctPavement(pavementList[i].Pavementid, Pavement.pavementSide.right);
+            }
+        }
 
         private void generateHighwayList()
         {
-
             //Eliminate small highways that cause problems
             for (int i = 0; i < wayList.Count; i++)
             {
@@ -127,11 +141,38 @@ namespace Assets.Scripts.SceneObjects
                     correctIntersection(intersections[i]);
             }
 
+            DrapeHighway draper = new DrapeHighway();
             for (int i = 0; i < highwayList.Count; i++)
-                highwayList[i].DrapeRoad(terrain);
+                draper.DrapeRoad(terrain, highwayList[i].leftSideVertexes, highwayList[i].rightSideVertexes);
 
         }
+        private void generatePavementList()
+        {
+            DrapeHighway draper = new DrapeHighway();
 
+            for (int i = 0; i < highwayList.Count; i++)
+            {
+                if (highwayList[i].hasLeftSidewalk)
+                {
+                    Pavement newPavement = new Pavement(highwayList[i], terrain,Pavement.pavementSide.left);
+                    if (newPavement.leftSideVertexes.Count == 0 || newPavement.rightSideVertexes.Count == 0)
+                        continue;
+                    draper.DrapeRoad(terrain, newPavement.leftSideVertexes, newPavement.rightSideVertexes);
+                    pavementList.Add(newPavement);
+                }
+                if(highwayList[i].hasRightSideWalk)
+                {
+                    Pavement newPavement = new Pavement(highwayList[i], terrain, Pavement.pavementSide.right);
+                    if (newPavement.leftSideVertexes.Count == 0 || newPavement.rightSideVertexes.Count == 0)
+                        continue;
+                    draper.DrapeRoad(terrain, newPavement.leftSideVertexes, newPavement.rightSideVertexes);
+                    pavementList.Add(newPavement);
+                }
+            }
+
+
+
+        }
 
         /// <summary>
         /// Divide necessary ways into multiple pieces for easier intersection handling
@@ -167,7 +208,6 @@ namespace Assets.Scripts.SceneObjects
         /// </summary>
         private void divideWay(string wayID, int intersectionIndex)
         {
-            List<IntersectionNode> others = intersections.FindAll(item => item.wayIds.Exists(item2 => item2 == wayID));
             int wayIndex = getWayIndex(wayID);
 
             Way w1 =  new Way(wayList[wayIndex]);
@@ -220,44 +260,62 @@ namespace Assets.Scripts.SceneObjects
 
         }
 
-        private void fillIntersectionHole(List<intersectionInfo> intersections)
+        private void fillIntersectionHole(List<intersectionInfo> intersectionInfos, bool hasTrafficLight, string intersectionID)
         {
-            Vector3[] vertices = orderIntersectionVertices(intersections);
+            Vector3[] vertices = orderIntersectionVertices(intersectionInfos);
             int[] triangles = new int[(intersections.Count-2)*3];
-            Vector3[] normals = new Vector3[intersections.Count];
-            Vector2[] uv = new Vector2[intersections.Count];
+            Vector3[] normals = new Vector3[intersectionInfos.Count];
+            Vector2[] uv = new Vector2[intersectionInfos.Count];
+            int intersectionIndex = intersections.FindIndex(item => item.node.id == intersectionID);
+
+            if (hasTrafficLight)
+            {
+                if (intersections[intersectionIndex].trafficLights != null)
+                {
+                    GameObject.Destroy(intersections[intersectionIndex].trafficLights[0].object3D);
+                    intersections[intersectionIndex].trafficLights.RemoveAt(0);
+                }
+
+                IntersectionNode Node = intersections[intersectionIndex];
+                Node.trafficLights = new List<Object3D>();
+                Node.trafficLights.Add(drawTrafficSign(vertices[UnityEngine.Random.Range(0, vertices.Length)]));
+                intersections[intersectionIndex] = Node;
+            }
+
+
+
             int itr = 0;
-            for(int i = 1 ; i < intersections.Count-1 ; i++)
+            for(int i = 1 ; i < intersectionInfos.Count-1 ; i++)
             {
                 triangles[itr++] = 0;
-                triangles[itr++] = i+1;
                 triangles[itr++] = i;
+                triangles[itr++] = i+1;
             }
-            for(int i = 0 ; i < intersections.Count ; i++)
+            for(int i = 0 ; i < intersectionInfos.Count ; i++)
                 normals[i] = Vector3.up;
 
             //UV CALCULATION
             float lowestX, lowestZ, highestX, highestZ;
 
-            lowestX = intersections[0].vertice.x;
-            lowestZ = intersections[0].vertice.z;
-            highestX = intersections[0].vertice.x;
-            highestZ = intersections[0].vertice.z;
+            lowestX = intersectionInfos[0].vertice.x;
+            lowestZ = intersectionInfos[0].vertice.z;
+            highestX = intersectionInfos[0].vertice.x;
+            highestZ = intersectionInfos[0].vertice.z;
 
 
-            for (int i = 1; i < intersections.Count; i++)
+            for (int i = 1; i < intersectionInfos.Count; i++)
             {
-                if (intersections[i].vertice.x < lowestX)
-                    lowestX = intersections[i].vertice.x;
+                if (intersectionInfos[i].vertice.x < lowestX)
+                    lowestX = intersectionInfos[i].vertice.x;
                 
-                if (intersections[i].vertice.z < lowestZ)
-                    lowestZ = intersections[i].vertice.z;
+                if (intersectionInfos[i].vertice.z < lowestZ)
+                    lowestZ = intersectionInfos[i].vertice.z;
 
-                if (intersections[i].vertice.x > highestX)
-                    highestX = intersections[i].vertice.x;
+                if (intersectionInfos[i].vertice.x > highestX)
+                    highestX = intersectionInfos[i].vertice.x;
 
-                if (intersections[i].vertice.z > highestZ)
-                    highestZ = intersections[i].vertice.z;
+                if (intersectionInfos[i].vertice.z > highestZ)
+                    highestZ = intersectionInfos[i].vertice.z;
 
             }
 
@@ -267,25 +325,43 @@ namespace Assets.Scripts.SceneObjects
             float offsetX = 0.0f - lowestX;
             float offsetZ = 0.0f - lowestZ;
 
-            for (int i = 0; i < intersections.Count; i++)
+            for (int i = 0; i < intersectionInfos.Count; i++)
             {
-                Vector2 vec = new Vector2(intersections[i].vertice.x,intersections[i].vertice.z);
+                Vector2 vec = new Vector2(intersectionInfos[i].vertice.x,intersectionInfos[i].vertice.z);
                 uv[i] = new Vector2((vec.x + offsetX) / rangeX, (vec.y + offsetZ) / rangeZ);
             }
-
-            
-            GameObject intersectArea = new GameObject("intersectArea", typeof(MeshFilter), typeof(MeshRenderer));
 
             Mesh mesh = new Mesh();
             mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.uv = uv;
 
-            MeshFilter objectmesh = intersectArea.GetComponent<MeshFilter>();
-            objectmesh.mesh = mesh;
+            IntersectionNode interNode = intersections[intersectionIndex];
+            if (interNode.intersectionHole == null)
+            {
 
-            MeshRenderer objectrenderer = intersectArea.GetComponent<MeshRenderer>();
-            objectrenderer.material = (Material)Resources.Load("Materials/Highway/Mat_RoadIntersection");
+                interNode.intersectionHole = new GameObject("intersectArea", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+
+                MeshFilter objectmesh = interNode.intersectionHole.GetComponent<MeshFilter>();
+                objectmesh.mesh = mesh;
+
+                MeshRenderer objectrenderer = interNode.intersectionHole.GetComponent<MeshRenderer>();
+                objectrenderer.material = (Material)Resources.Load("Materials/Highway/Mat_RoadIntersection");
+
+                MeshCollider objectcollider = interNode.intersectionHole.GetComponent<MeshCollider>();
+                objectcollider.sharedMesh = mesh;
+
+                objectrenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            else
+            {
+                MeshFilter objectmesh = interNode.intersectionHole.GetComponent<MeshFilter>();
+                objectmesh.mesh = mesh;
+
+                MeshCollider objectcollider = interNode.intersectionHole.GetComponent<MeshCollider>();
+                objectcollider.sharedMesh = mesh;
+            }
+            intersections[intersectionIndex] = interNode;
 
         }
 
@@ -330,6 +406,265 @@ namespace Assets.Scripts.SceneObjects
         }
 
 
+        private void correctPavementIntersection(IntersectionNode intersection,string wayID, Pavement.pavementSide side)
+        {
+            Highway highwayOrg, highwayFound; 
+            Vector3 intersectionPoint;
+            Vector2 calculatedIntersection = new Vector2();
+            
+
+
+            int intersectCondition = -1; //0:start-left, 1:start-right, 2:end-left,3:end-right
+            int intersectCondition2 = -1; // 0: start , 1 : left;
+
+            //1. Find the point that given highway intersect with the other highway from the given side
+            highwayOrg = highwayList.Find(item => item.id == wayID);
+            highwayFound = null;
+            int indexOrg = intersection.wayIds.FindIndex(item => item == wayID);
+            if (intersection.intersectionTypes[indexOrg] == IntersectionType.front)
+            {
+
+                if (side == Pavement.pavementSide.left)
+                {
+                    intersectionPoint = highwayOrg.leftSideVertexes[0]; //start-left
+                    intersectCondition = 0;
+                }
+                else
+                {
+                    intersectionPoint = highwayOrg.rightSideVertexes[0]; //start-right
+                    intersectCondition = 1;
+                }
+            }
+            else
+            {
+
+                if (side == Pavement.pavementSide.left)
+                {
+                    intersectionPoint = highwayOrg.leftSideVertexes[highwayOrg.leftSideVertexes.Count - 1]; //end - left
+                    intersectCondition = 2;
+                }
+                else
+                {
+                    intersectionPoint = highwayOrg.rightSideVertexes[highwayOrg.rightSideVertexes.Count - 1]; // end - right
+                    intersectCondition = 3;
+                }
+            }
+
+            //2. For the intersection point compare all other highways in the intersection to Detect the highway we are looking for
+            
+            for(int i = 0 ; i < intersection.wayIds.Count ;i++)
+            {
+                if (intersection.wayIds[i] == wayID)
+                    continue;
+
+                highwayFound = highwayList.Find(item => item.id == intersection.wayIds[i]);
+
+                if(intersection.intersectionTypes[i] == IntersectionType.front) //start
+                {
+
+                    if (highwayFound.leftSideVertexes[0] == intersectionPoint || highwayFound.rightSideVertexes[0] == intersectionPoint)
+                    {
+                        intersectCondition2 = 0;
+                        break;
+                    }
+                }
+                
+                else //end
+                {
+                    
+                    if (highwayFound.leftSideVertexes[highwayFound.leftSideVertexes.Count - 1] == intersectionPoint ||
+                        highwayFound.rightSideVertexes[highwayFound.rightSideVertexes.Count - 1] == intersectionPoint)
+                    {
+                        intersectCondition2 = 1;
+                        break;
+                    }                      
+                }
+            }
+
+            //3. We found the 2 highways that are intersecting from the side stated. Lets Get appropriate pavement obj and calculate
+            //intersection points
+
+            Vector2 p1, p2, p3, p4;
+            int pavOrgIndex=-1, pavFoundIndex=-1;
+
+            pavOrgIndex = pavementList.FindIndex(item => item.Pavementid == wayID && item.side == side);
+            
+            
+            if(intersectCondition == 1 || intersectCondition == 2)
+            {
+                if (intersectCondition2 == 0)
+                    pavFoundIndex = pavementList.FindIndex(item => item.Pavementid == highwayFound.id && item.side == Pavement.pavementSide.left);
+                else if (intersectCondition2 == 1)
+                    pavFoundIndex = pavementList.FindIndex(item => item.Pavementid == highwayFound.id && item.side == Pavement.pavementSide.right);
+                else
+                {
+                    Debug.Log("PAVEMENT NOT FOUND EXCEPTION");
+                    return;
+                }
+            }
+
+            if (intersectCondition == 0 || intersectCondition == 3)
+            {
+                if (intersectCondition2 == 0)
+                    pavFoundIndex = pavementList.FindIndex(item => item.Pavementid == highwayFound.id && item.side == Pavement.pavementSide.right);
+                else if (intersectCondition2 == 1)
+                    pavFoundIndex = pavementList.FindIndex(item => item.Pavementid == highwayFound.id && item.side == Pavement.pavementSide.left);
+                else
+                {
+                    Debug.Log("PAVEMENT NOT FOUND EXCEPTION");
+                    return;
+                }
+            }
+
+            //3.1 Check if other highway has sidewalk at the given side
+            if (pavFoundIndex == -1)
+            {
+                //Debug.Log("No Pavement to Intersect");
+                return;
+            }
+
+            //3.2 Calculate Points for intersection
+            if (intersectCondition == 0) //start-left
+            {
+                p1 = new Vector2(pavementList[pavOrgIndex].leftSideVertexes[0].x, pavementList[pavOrgIndex].leftSideVertexes[0].z);
+                p2 = new Vector2(pavementList[pavOrgIndex].leftSideVertexes[1].x, pavementList[pavOrgIndex].leftSideVertexes[1].z);
+
+                if(intersectCondition2 == 0) // start-right
+                {
+                    p3 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[0].x, pavementList[pavFoundIndex].rightSideVertexes[0].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[1].x, pavementList[pavFoundIndex].rightSideVertexes[1].z);            
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.right,1);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.left, 0);
+
+                }
+                else //end-left
+                {
+                    int ind = pavementList[pavFoundIndex].leftSideVertexes.Count;
+                    p3 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[ind-2].x, pavementList[pavFoundIndex].leftSideVertexes[ind-2].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[ind-1].x, pavementList[pavFoundIndex].leftSideVertexes[ind-1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.left,ind-2);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.left, 0);       
+                }
+
+            }
+            else if (intersectCondition == 1) //start-right
+            {
+                p1 = new Vector2(pavementList[pavOrgIndex].rightSideVertexes[0].x, pavementList[pavOrgIndex].rightSideVertexes[0].z);
+                p2 = new Vector2(pavementList[pavOrgIndex].rightSideVertexes[1].x, pavementList[pavOrgIndex].rightSideVertexes[1].z);
+
+                if (intersectCondition2 == 0) // start-left
+                {
+                    p3 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[0].x, pavementList[pavFoundIndex].leftSideVertexes[0].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[1].x, pavementList[pavFoundIndex].leftSideVertexes[1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.left, 0);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.right, 1);
+                
+                }
+                else //end-right
+                {
+                    int ind = pavementList[pavFoundIndex].leftSideVertexes.Count;
+                    p3 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[ind - 2].x, pavementList[pavFoundIndex].rightSideVertexes[ind - 2].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[ind - 1].x, pavementList[pavFoundIndex].rightSideVertexes[ind - 1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.right, ind-1);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.right, 1);
+               
+                }
+            
+            }
+            else if (intersectCondition == 2) //end-left
+            {
+                int ind = pavementList[pavOrgIndex].leftSideVertexes.Count;
+                p1 = new Vector2(pavementList[pavOrgIndex].leftSideVertexes[ind-2].x, pavementList[pavOrgIndex].leftSideVertexes[ind-2].z);
+                p2 = new Vector2(pavementList[pavOrgIndex].leftSideVertexes[ind-1].x, pavementList[pavOrgIndex].leftSideVertexes[ind-1].z);
+
+                if (intersectCondition2 == 0) // start-left
+                {
+                    p3 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[0].x, pavementList[pavFoundIndex].leftSideVertexes[0].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[1].x, pavementList[pavFoundIndex].leftSideVertexes[1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.left, 0);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.left, ind-2);
+                }
+                else //end-right
+                {
+                    int ind2 = pavementList[pavFoundIndex].rightSideVertexes.Count;
+                    p3 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[ind2 - 2].x, pavementList[pavFoundIndex].rightSideVertexes[ind2 - 2].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[ind2 - 1].x, pavementList[pavFoundIndex].rightSideVertexes[ind2 - 1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.right, ind2-1);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.left, ind-2);
+                }
+            
+            }
+            else if (intersectCondition == 3) //end-right
+            {
+                int ind = pavementList[pavOrgIndex].rightSideVertexes.Count;
+                p1 = new Vector2(pavementList[pavOrgIndex].rightSideVertexes[ind-2].x, pavementList[pavOrgIndex].rightSideVertexes[ind-2].z);
+                p2 = new Vector2(pavementList[pavOrgIndex].rightSideVertexes[ind-1].x, pavementList[pavOrgIndex].rightSideVertexes[ind-1].z);
+
+                if (intersectCondition2 == 0) // start-right
+                {
+                    p3 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[0].x, pavementList[pavFoundIndex].rightSideVertexes[0].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].rightSideVertexes[1].x, pavementList[pavFoundIndex].rightSideVertexes[1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.right, 1);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.right, ind-1);
+                
+                }
+                else //end-left
+                {
+                    int ind2 = pavementList[pavFoundIndex].leftSideVertexes.Count;
+                    p3 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[ind2 - 2].x, pavementList[pavFoundIndex].leftSideVertexes[ind2 - 2].z);
+                    p4 = new Vector2(pavementList[pavFoundIndex].leftSideVertexes[ind2 - 1].x, pavementList[pavFoundIndex].leftSideVertexes[ind2 - 1].z);
+
+                    Geometry.getInfiniteLineIntersection(ref calculatedIntersection, p1, p2, p3, p4);
+                    Vector3 newVertice = new Vector3(calculatedIntersection.x,
+                                                 terrain.getTerrainHeight2(calculatedIntersection.y + terrain.terrainInfo.shiftZ, calculatedIntersection.x + terrain.terrainInfo.shiftX),
+                                                 calculatedIntersection.y);
+                    pavementList[pavFoundIndex].updateMesh(newVertice, Pavement.pavementSide.left, ind2-2);
+                    pavementList[pavOrgIndex].updateMesh(newVertice, Pavement.pavementSide.right, ind-1);
+                }            
+            
+            }
+
+
+
+        }
+
+
+
         private void correctIntersection(IntersectionNode intersection)
         {
 
@@ -358,9 +693,9 @@ namespace Assets.Scripts.SceneObjects
             {
                 Vector3 v = intersection.pointList[i] - intersection.node.meterPosition;
                 forwardVectors.Add(v);
-                Vector3 right = Vector3.Cross(v, up).normalized; 
-                rightVectors.Add(-right);
-                leftVectors.Add(right);
+                Vector3 right = Vector3.Cross(up, v).normalized; 
+                rightVectors.Add(right);
+                leftVectors.Add(-right);
 
                 LineSegment ls = new LineSegment();
                 ls.Left1 = new Vector2(intersection.node.meterPosition.x, intersection.node.meterPosition.z) + new Vector2(-right.x, -right.z) * (waySize / 2.0f);
@@ -420,7 +755,7 @@ namespace Assets.Scripts.SceneObjects
                 if ((truthtable[way1No].left == false && truthtable[way1No].right == false) || (truthtable[way2No].left == false && truthtable[way2No].right == false))
                 {
                     iside = intersectWay(way1No, way2No, intersection, lineSegments[way1No], lineSegments[way2No],
-                                                      forwardVectors[way1No], forwardVectors[way2No]);
+                                                      forwardVectors[way1No], forwardVectors[way2No],sortedAngles[0].angle);
                 }
                 else //Forced intersect
                 {
@@ -477,13 +812,8 @@ namespace Assets.Scripts.SceneObjects
 
             }
 
-            if(isTrafficLight(intersection.node))
-            {
-                for (int i = 0; i < intersectList.Count; i+=2)
-                    drawTrafficSign(intersectList[i].vertice);
-            }
 
-            fillIntersectionHole(intersectList);
+            fillIntersectionHole(intersectList, isTrafficLight(intersection.node), intersection.node.id);
 
         }
 
@@ -494,14 +824,16 @@ namespace Assets.Scripts.SceneObjects
 
             int index1 = getHighwayIndex(intersection.wayIds[0]);
             Vector3 forward1 = intersection.node.meterPosition - intersection.pointList[0];
-            Vector3 right1 = Vector3.Cross(forward1, up);
+            //****************************************************************************
+            Vector3 right1 = Vector3.Cross(up, forward1);
             right1 = right1.normalized;
             Vector3 left1 = -right1;
             float waySize1 = highwayList[index1].waySize;
 
             int index2 = getHighwayIndex(intersection.wayIds[1]);
             Vector3 forward2 = intersection.pointList[1] - intersection.node.meterPosition;
-            Vector3 right2 = Vector3.Cross(forward2, up);
+            //*****************************************************************************
+            Vector3 right2 = Vector3.Cross(up, forward2);
             right2 = right2.normalized;
             Vector3 left2 = -right2;
             float waySize2 = highwayList[index2].waySize;
@@ -511,9 +843,9 @@ namespace Assets.Scripts.SceneObjects
                 intersectionType = 0;
             else if (intersection.intersectionIndex[0] == 0 && intersection.intersectionIndex[1] != 0)
                 intersectionType = 1;
-            else if (intersection.intersectionIndex[0] == 0 && intersection.intersectionIndex[1] != 0)
-                intersectionType = 2;
             else if (intersection.intersectionIndex[0] != 0 && intersection.intersectionIndex[1] == 0)
+                intersectionType = 2;
+            else if (intersection.intersectionIndex[0] != 0 && intersection.intersectionIndex[1] != 0)
                 intersectionType = 3;
 
             float waySize = (waySize1 + waySize2) / 2.0f;
@@ -549,38 +881,48 @@ namespace Assets.Scripts.SceneObjects
 
             if(isTrafficLight(intersection.node))
             {
-                drawTrafficSign(newVertexLeft);
-                drawTrafficSign(newVertexRight);
+                int intersectionIndex = intersections.FindIndex(item => item.node.id == intersection.node.id);
+                if (intersections[intersectionIndex].trafficLights != null)
+                {
+                    for (int ind = 0; ind < intersections[intersectionIndex].trafficLights.Count; ind++)                    
+                        GameObject.Destroy(intersections[intersectionIndex].trafficLights[ind].object3D);                   
+                }
+
+                IntersectionNode node = intersections[intersectionIndex];
+                node.trafficLights = new List<Object3D>();
+                node.trafficLights.Add(drawTrafficSign(newVertexLeft));
+                node.trafficLights.Add(drawTrafficSign(newVertexRight));
+                intersections[intersectionIndex] = node;    
             }
 
 
-            if (intersectionType == 0)
+            if (intersectionType == 0) //start - start
             {
                 highwayList[index1].rightSideVertexes[intersection.intersectionIndex[0]] = newVertexLeft;
                 highwayList[index2].leftSideVertexes[intersection.intersectionIndex[1]] = newVertexLeft;
                 highwayList[index1].leftSideVertexes[intersection.intersectionIndex[0]] = newVertexRight;
                 highwayList[index2].rightSideVertexes[intersection.intersectionIndex[1]] = newVertexRight;
             }
-            else if (intersectionType == 1)
+            else if (intersectionType == 1) //start - end
             {
                 highwayList[index1].rightSideVertexes[intersection.intersectionIndex[0]] = newVertexLeft;
                 highwayList[index2].rightSideVertexes[intersection.intersectionIndex[1]] = newVertexLeft;
                 highwayList[index1].leftSideVertexes[intersection.intersectionIndex[0]] = newVertexRight;
                 highwayList[index2].leftSideVertexes[intersection.intersectionIndex[1]] = newVertexRight;
             }
-            else if (intersectionType == 2)
+            else if (intersectionType == 2) // end - start
+            {
+                highwayList[index1].leftSideVertexes[intersection.intersectionIndex[0]] = newVertexLeft;
+                highwayList[index2].rightSideVertexes[intersection.intersectionIndex[1]] = newVertexRight;
+                highwayList[index1].rightSideVertexes[intersection.intersectionIndex[0]] = newVertexRight;
+                highwayList[index2].leftSideVertexes[intersection.intersectionIndex[1]] = newVertexLeft;
+            }
+            else if (intersectionType == 3) // end - end
             {
                 highwayList[index1].leftSideVertexes[intersection.intersectionIndex[0]] = newVertexLeft;
                 highwayList[index2].rightSideVertexes[intersection.intersectionIndex[1]] = newVertexLeft;
                 highwayList[index1].rightSideVertexes[intersection.intersectionIndex[0]] = newVertexRight;
                 highwayList[index2].leftSideVertexes[intersection.intersectionIndex[1]] = newVertexRight;
-            }
-            else if (intersectionType == 3)
-            {
-                highwayList[index1].leftSideVertexes[intersection.intersectionIndex[0]] = newVertexLeft;
-                highwayList[index2].leftSideVertexes[intersection.intersectionIndex[1]] = newVertexLeft;
-                highwayList[index1].rightSideVertexes[intersection.intersectionIndex[0]] = newVertexRight;
-                highwayList[index2].rightSideVertexes[intersection.intersectionIndex[1]] = newVertexRight;
             }
 
 
@@ -598,7 +940,7 @@ namespace Assets.Scripts.SceneObjects
         /// <summary>
         /// Tries to intersect way1 and way2 (if the angle <180) 
         /// </summary>
-        private intersectionside intersectWay(int way1No, int way2No, IntersectionNode intersection, LineSegment segment1, LineSegment segment2,Vector3 fwd1, Vector3 fwd2)
+        private intersectionside intersectWay(int way1No, int way2No, IntersectionNode intersection, LineSegment segment1, LineSegment segment2,Vector3 fwd1, Vector3 fwd2,double angle)
         {
             int highwayIndex1 = getHighwayIndex(intersection.wayIds[way1No]);
             int highwayIndex2 = getHighwayIndex(intersection.wayIds[way2No]);
@@ -606,7 +948,8 @@ namespace Assets.Scripts.SceneObjects
             Vector2 intersect = new Vector2();
             if (Geometry.getHalfVectorIntersection(ref intersect, segment1.Left1, segment1.Left2, fwd1, segment2.Right1, segment2.Right2, fwd2))
             {
-                Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);
+
+                Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);  
                 applyIntersection(way1No, way2No,highwayIndex1,highwayIndex2, newVertex, intersection, true);
                 
                 intersectionside s = new intersectionside();
@@ -654,7 +997,7 @@ namespace Assets.Scripts.SceneObjects
 
             if(leftright)
             {
-                bool isTrue = Geometry.getVectorIntersection(ref intersect, segment1.Left1, segment1.Left2, fwd1, segment2.Right1, segment2.Right2, fwd2);
+                Geometry.getVectorIntersection(ref intersect, segment1.Left1, segment1.Left2, fwd1, segment2.Right1, segment2.Right2, fwd2);
                 Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);
                 applyIntersection(way1No, way2No, highwayIndex1, highwayIndex2, newVertex, intersection, true);
 
@@ -668,7 +1011,7 @@ namespace Assets.Scripts.SceneObjects
 
             else
             {
-                bool isTrue = Geometry.getVectorIntersection(ref intersect, segment1.Right1, segment1.Right2, fwd1, segment2.Left1, segment2.Left2, fwd2);
+                Geometry.getVectorIntersection(ref intersect, segment1.Right1, segment1.Right2, fwd1, segment2.Left1, segment2.Left2, fwd2);
                 Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);
                 applyIntersection(way1No, way2No, highwayIndex1, highwayIndex2, newVertex, intersection, false);
 
@@ -687,6 +1030,7 @@ namespace Assets.Scripts.SceneObjects
         /// </summary>
         private void applyIntersection(int way1No, int way2No,int highwayIndex1,int highwayIndex2, Vector3 newVertex, IntersectionNode intersection, bool leftRight)
         {
+
             if(leftRight)
             {
                 //Update Way1
@@ -809,7 +1153,7 @@ namespace Assets.Scripts.SceneObjects
         /// </summary>
         private int getHighwayIndex(string wayID)
         {
-            return highwayList.FindIndex(item => item.way.id == wayID);
+            return highwayList.FindIndex(item => item.id == wayID);
         }
 
         /// <summary>
@@ -820,11 +1164,18 @@ namespace Assets.Scripts.SceneObjects
             return wayList.FindIndex(item => item.id == wayID);
         }
 
-
-        private void drawTrafficSign(Vector3 pos)
+        private Object3D drawTrafficSign(Vector3 pos)
         {
-            GameObject trafficSign = (GameObject)MonoBehaviour.Instantiate(Resources.Load("Prefabs/TrafficSign/TrafficLight"));
-            trafficSign.transform.position = pos + new Vector3(0.0f,4.0f,0.0f);
+            Object3D obj = new Object3D();
+            obj.name = "Traffic Light";
+            obj.type = ObjectType.TrafficSign;
+            obj.resourcePath = "Prefabs/TrafficSign/TrafficLight1/TrafficLight1Prefab";
+            obj.object3D = (GameObject)MonoBehaviour.Instantiate(Resources.Load("Prefabs/TrafficSign/TrafficLight1/TrafficLight1Prefab"));
+            obj.object3D.AddComponent<Object3dMouseHandler>();
+            obj.object3D.transform.position = pos + new Vector3(0.2f, 2.0f, -0.2f);
+            obj.object3D.tag = "3DObject";
+            obj.object3D.name = "Traffic Light";
+            return obj;
         }
         private bool isTrafficLight(Node nd)
         {
@@ -838,6 +1189,130 @@ namespace Assets.Scripts.SceneObjects
                     return true;
             }
             return false;
+
+        }
+
+        public void addNewPavement(string pavementID, Pavement.pavementSide side, float size)
+        {
+            int highwayIndex = getHighwayIndex(pavementID);
+            if (side == Pavement.pavementSide.left)
+            {
+                highwayList[highwayIndex].hasLeftSidewalk = true;
+                highwayList[highwayIndex].leftSidewalkSize = size;
+            }
+            else
+            {
+                highwayList[highwayIndex].hasRightSideWalk = true;
+                highwayList[highwayIndex].rightSidewalkSize = size;
+            }
+
+            Pavement newPavement = new Pavement(highwayList[getHighwayIndex(pavementID)], terrain, side);
+            pavementList.Add(newPavement);
+            newPavement.renderPavement();
+        }
+
+        public void deletePavement(string pavementID, Pavement.pavementSide side)
+        {
+            int highwayIndex = getHighwayIndex(pavementID);
+            if (side == Pavement.pavementSide.left)
+            {
+                highwayList[highwayIndex].hasLeftSidewalk = false;
+                highwayList[highwayIndex].leftSidewalkSize = 0;
+            }
+            else
+            {
+                highwayList[highwayIndex].hasRightSideWalk = false;
+                highwayList[highwayIndex].rightSidewalkSize = 0;
+            }
+
+            int pavementIndex = pavementList.FindIndex(item => item.Pavementid == pavementID &&
+                                               item.side == side);
+
+            UnityEngine.Object.Destroy(pavementList[pavementIndex].PavementObj);
+            pavementList.RemoveAt(pavementIndex);
+        }
+
+        public void correctPavement(string pavementID, Pavement.pavementSide side)
+        {
+            List<IntersectionNode> nodes = intersections.FindAll(item => item.wayIds.Contains(pavementID));
+
+            for (int i = 0; i < nodes.Count; i++)
+                correctPavementIntersection(nodes[i], pavementID, side);
+        }
+
+        public void resizeHighway(string highwayID, float newSize)
+        {
+
+            int highwayIndex = highwayList.FindIndex(item => item.id == highwayID);           
+            highwayList[highwayIndex].waySize = newSize;
+            highwayList[highwayIndex].generateInitial3Dway(terrain);
+
+
+            List<IntersectionNode> allIntersections = intersections.FindAll(item => item.wayIds.Contains(highwayID));
+            for (int i = 0; i < allIntersections.Count; i++)
+                resetIntersectionNode(allIntersections[i]);
+
+            for (int i = 0; i < allIntersections.Count; i++)
+            {
+                if (allIntersections[i].wayIds.Count == 2)
+                    correct2wayIntersection(allIntersections[i]);
+                else
+                    correctIntersection(allIntersections[i]);
+            }
+
+            DrapeHighway draper = new DrapeHighway();
+            draper.DrapeRoad(terrain, highwayList[highwayIndex].leftSideVertexes, highwayList[highwayIndex].rightSideVertexes);            
+
+            for (int i = 0; i < allIntersections.Count; i++)
+            {
+                    for (int k = 0; k < allIntersections[i].wayIds.Count; k++)
+                    {
+                        int hwIndex = highwayList.FindIndex(item => item.id == allIntersections[i].wayIds[k]);
+                        highwayList[hwIndex].updateHighwayMesh();
+
+                        if (highwayList[highwayIndex].hasLeftSidewalk)
+                        {
+                            float size = highwayList[highwayIndex].leftSidewalkSize;
+                            deletePavement(highwayList[highwayIndex].id, Pavement.pavementSide.left);
+                            addNewPavement(highwayList[highwayIndex].id, Pavement.pavementSide.left, size);
+                            correctPavement(highwayList[highwayIndex].id, Pavement.pavementSide.left);
+                        }
+                        if (highwayList[highwayIndex].hasRightSideWalk)
+                        {
+                            float size = highwayList[highwayIndex].rightSidewalkSize;
+                            deletePavement(highwayList[highwayIndex].id, Pavement.pavementSide.right);
+                            addNewPavement(highwayList[highwayIndex].id, Pavement.pavementSide.right, size);
+                            correctPavement(highwayList[highwayIndex].id, Pavement.pavementSide.right);
+                        }
+
+                    }
+            }
+
+
+      
+        }
+
+        private void resetIntersectionNode(IntersectionNode node)
+        {
+            for(int i = 0 ; i < node.wayIds.Count ; i++)
+            {
+                Highway hway = highwayList.Find(item => item.id == node.wayIds[i]);
+                Vector3 forward = (node.pointList[i] - node.node.meterPosition).normalized;
+                Vector3 right = Vector3.Cross(Vector3.up,forward);
+                Vector3 left = -right;
+
+                if(node.intersectionTypes[i] == IntersectionType.front)
+                {
+                    hway.leftSideVertexes[0] = hway.way.nodes[0].meterPosition + left * (hway.waySize/2.0f);
+                    hway.rightSideVertexes[0] = hway.way.nodes[0].meterPosition + right * (hway.waySize / 2.0f);
+                }
+                else if(node.intersectionTypes[i] == IntersectionType.end)
+                {
+                    hway.leftSideVertexes[hway.leftSideVertexes.Count - 1] = hway.way.nodes[hway.way.nodes.Count-1].meterPosition + right * (hway.waySize / 2.0f);
+                    hway.rightSideVertexes[hway.rightSideVertexes.Count - 1] = hway.way.nodes[hway.way.nodes.Count - 1].meterPosition + left * (hway.waySize / 2.0f);
+                }
+
+            }
 
         }
     }

@@ -6,6 +6,7 @@ using UnityEngine;
 using Assets.Scripts.HeightMap;
 using Assets.Scripts.OpenStreetMap;
 using Assets.Scripts.Utils;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
 
 namespace Assets.Scripts.SceneObjects
 {
@@ -43,7 +44,7 @@ namespace Assets.Scripts.SceneObjects
     public class myTerrain
     {
 
-        HeighmapLoader heightmap;
+        HeightmapLoader heightmap;
         public BBox scenebbox;
         public TerrainInfo terrainInfo;
         private string OSMfileName;
@@ -52,7 +53,7 @@ namespace Assets.Scripts.SceneObjects
         public List<GameObject> gridList;
         public MapProvider textureType;
 
-        public myTerrain(HeighmapLoader _heightmap, BBox _bbox, string _OSMfileName, MapProvider _provider)
+        public myTerrain(HeightmapLoader _heightmap, BBox _bbox, string _OSMfileName, MapProvider _provider)
         {
             OSMfileName = _OSMfileName;     
             heightmap = _heightmap;
@@ -149,8 +150,10 @@ namespace Assets.Scripts.SceneObjects
             //Debug.Log("<color=red>Grid BBOX:</color> left:" + bbox.meterLeft + " right:" + bbox.meterRight + 
             //         " bottom:" + bbox.meterBottom + " top:" + bbox.meterTop);
 
-            GameObject grid = new GameObject("Grid"+ i + "_" + j , typeof(MeshRenderer), typeof(MeshFilter));
+            GameObject grid = new GameObject("Grid"+ i + "_" + j , typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider));
             grid.transform.parent = terrainObject.transform;
+            grid.tag = "Terrain";
+            grid.AddComponent<TerrainMouseHandler>();
 
             Mesh mesh = new Mesh();
           
@@ -201,6 +204,9 @@ namespace Assets.Scripts.SceneObjects
             mat.mainTexture = texturehandler.generateTexture(textureType, bbox,i,j,OSMfileName);
             MeshRenderer meshrenderer = grid.GetComponent<MeshRenderer>();
             meshrenderer.material = mat;
+
+            MeshCollider meshCollider = grid.GetComponent<MeshCollider>();
+            meshCollider.sharedMesh = mesh;
 
             gridList.Add(grid);
 
@@ -362,9 +368,9 @@ namespace Assets.Scripts.SceneObjects
                 
                     // deduce terrain normal
                     Vector3 N = new Vector3();
-                    N.x = hL - hR;
+                    N.z = hL - hR;
                     N.y = 2.0f;
-                    N.z = hU - hD;
+                    N.x = hU - hD;
                     N = Vector3.Normalize(N);
                     normals[itr++] = N;
                 }

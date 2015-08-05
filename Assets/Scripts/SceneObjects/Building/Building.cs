@@ -6,7 +6,10 @@ using UnityEngine;
 using Assets.Scripts.OpenStreetMap;
 using Assets.Scripts.Utils;
 using Assets.Scripts.ConfigHandler;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
 using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Assets.Scripts.SceneObjects
 {
@@ -25,13 +28,22 @@ namespace Assets.Scripts.SceneObjects
         matFacadeCustom
     }
 
+    public struct FacadeSkin
+    {
+        [XmlAttribute("facadeID")]
+        public int facadeID;
+        //UV coordinates for corners
+        public Vector2 topLeft, topRight, bottomLeft, bottomRight;
+        //Texture paths
+        public string colorTexturePath;
+        public string normalTexturePath;
+        public string specularTexturePath;
+    }
 
-    class Building
+    public class Building
     {
         public string id;
-        bool isClockwise;
-        List<Node> nodeList;
-        List<Tag> tagList;
+        public bool isClockwise;
 
         public Way way;
         public BuildingRelation relation;
@@ -40,50 +52,58 @@ namespace Assets.Scripts.SceneObjects
         BuildingConfigurations buildingConfig;
 
         //Height of Building
-        float buildingHeight;
+        public float buildingHeight;
         //In order to keep building up vector (0,1,0), roof level equalized for all vertices 
-        float equalizedBuildingHeight;
+        private float equalizedBuildingHeight;
         
-        List<GameObject> facades;
-        GameObject roof;
-        GameObject building;
-
-        Material defaultMaterial;
+        public Material defaultMaterial;
+        public int defaultMaterialID;
         float defaultTextureWidth;
+        
+        //Necessary parameters for saving Project
+        public string modelPath;
+        public Vector3 GOtransform, GOrotate, GOscale;
+        public List<FacadeSkin> facadeSkins;
 
-       
-        public Building(Way _way, BuildingConfigurations config, Material mat, float texWidth)
+
+        public GameObject building;
+        public List<GameObject> facades; 
+        GameObject roof;
+
+        
+
+        public Building(Way _way, BuildingConfigurations config, Material mat, int materialID, float texWidth)
         {
             type = buildingType.standard;
             way = _way;
-            building = new GameObject("building" + way.id);
-            building.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-            
+
             id = way.id;
-            nodeList = way.nodes;
-            tagList = way.tags;
 
             buildingConfig = config;
             buildingHeight = getBuildingHeight(way.tags);
             equalizedBuildingHeight = assingBuildingTopLevel(way);
 
             defaultMaterial = mat;
-            defaultTextureWidth = texWidth; 
+            defaultMaterialID = materialID;
+            defaultTextureWidth = texWidth;
+            facadeSkins = new List<FacadeSkin>();
 
             isClockwise = getWayOrientation(way);
 
+            building = new GameObject("building" + id);
+            building.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
+            GOtransform = new Vector3(0, 0, 0);
+            GOrotate = new Vector3(0, 0, 0);
+            GOscale = new Vector3(1, 1, 1);
         }
 
-        public Building(BuildingRelation _relation, BuildingConfigurations config, Material mat, float texWidth)
+        public Building(BuildingRelation _relation, BuildingConfigurations config, Material mat,int materialID, float texWidth)
         {
             type = buildingType.withholeInside;
             relation = _relation;
-            building = new GameObject("RelationBuilding" + relation.id);
-            building.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
             id = relation.outerWall.id;
-            tagList = relation.tags;
 
             buildingConfig = config;
             buildingHeight = getBuildingHeight(relation.tags);
@@ -92,32 +112,42 @@ namespace Assets.Scripts.SceneObjects
             isClockwise = getWayOrientation(relation.outerWall);
 
             defaultMaterial = mat;
+            defaultMaterialID = materialID;
             defaultTextureWidth = texWidth;
+            facadeSkins = new List<FacadeSkin>();
 
+            building = new GameObject("building" + id);
+            building.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
+            GOtransform = new Vector3(0, 0, 0);
+            GOrotate = new Vector3(0, 0, 0);
+            GOscale = new Vector3(1, 1, 1);
 
         }
 
         public void RenderBuilding()
         {
+            facades =  new List<GameObject>();            
+            roof = new GameObject("roof", typeof(MeshRenderer), typeof(MeshFilter));
+            roof.transform.parent = building.transform;
+
             if (type == buildingType.standard)
             {
-                facades = new List<GameObject>();
+       
                 for (int i = 0; i < way.nodes.Count - 1; i++)
-                    createFacade(way.nodes[i], way.nodes[i + 1]);
+                    createFacade(i,way.nodes[i], way.nodes[i + 1],building);
 
-                createRoof(way);
+                createRoof(way,roof);
             }
             else if(type == buildingType.withholeInside)
             {
-                facades = new List<GameObject>();
                 for (int i = 0; i < relation.outerWall.nodes.Count - 1; i++)
-                    createFacade(relation.outerWall.nodes[i], relation.outerWall.nodes[i + 1]);
+                    createFacade(i,relation.outerWall.nodes[i], relation.outerWall.nodes[i + 1],building);
                 for (int i = 0; i < relation.innerHoles.Count; i++)
                     for (int j = 0; j < relation.innerHoles[i].nodes.Count - 1; j++)
-                        createFacade(relation.innerHoles[i].nodes[j], relation.innerHoles[i].nodes[j + 1]);
+                        createFacade(-1,relation.innerHoles[i].nodes[j], relation.innerHoles[i].nodes[j + 1],building);
 
-                createRoof(relation);
+                createRoof(relation,roof);
             }
 
 
@@ -136,11 +166,12 @@ namespace Assets.Scripts.SceneObjects
             return equalized + buildingHeight;
         }
 
-        private void createFacade(Node node1, Node node2)
+        private void createFacade(int facadeID, Node node1, Node node2,GameObject building)
         {
-            GameObject facade = new GameObject("facade", typeof(MeshRenderer), typeof(MeshFilter));
+            GameObject facade = new GameObject("facade" +facadeID, typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider));
+            facade.tag = "Building";
             facade.transform.parent = building.transform;
-         
+            facade.AddComponent<BuildingMouseHandler>();
 
             Vector3[] vertices = {
                                      node1.meterPosition,
@@ -156,8 +187,12 @@ namespace Assets.Scripts.SceneObjects
             else
                 triangles = new int[] {0,3,2,2,1,0};
 
-            //Texture Size
+            //Texture Size Horizontal
             float aa;
+            //Texture Size Vertical
+            float bb;
+
+            bb = equalizedBuildingHeight - buildingHeight; // Min Height
 
             try
             {
@@ -171,15 +206,15 @@ namespace Assets.Scripts.SceneObjects
             Vector2[] UVcoords = new Vector2[4];
             if(isClockwise)
             {
-                UVcoords[0] = new Vector2(0,0);
-                UVcoords[1] = new Vector2(aa, 0);
+                UVcoords[0] = new Vector2(0, (vertices[0].y - bb) / buildingHeight);
+                UVcoords[1] = new Vector2(aa, (vertices[1].y - bb) / buildingHeight);
                 UVcoords[2] = new Vector2(aa, 1);
                 UVcoords[3] = new Vector2(0, 1);
             }
             else
             {
-                UVcoords[0] = new Vector2(aa, 0);
-                UVcoords[1] = new Vector2(0, 0);
+                UVcoords[0] = new Vector2(aa, (vertices[0].y - bb)/buildingHeight);
+                UVcoords[1] = new Vector2(0, (vertices[1].y - bb) / buildingHeight);
                 UVcoords[2] = new Vector2(0, 1);
                 UVcoords[3] = new Vector2(aa, 1);
             }
@@ -211,13 +246,14 @@ namespace Assets.Scripts.SceneObjects
             MeshRenderer meshRenderer = facade.GetComponent<MeshRenderer>();
             meshRenderer.material = defaultMaterial;
 
+            MeshCollider meshCollider = facade.GetComponent<MeshCollider>();
+            meshCollider.sharedMesh = mesh;
+
             facades.Add(facade);
         }
 
-        private void createRoof(Way way)
+        private void createRoof(Way way,GameObject roof)
         {
-            roof = new GameObject("roof", typeof(MeshRenderer), typeof(MeshFilter));
-            roof.transform.parent = building.transform;
 
             Vector2[] vertices2D = new Vector2[way.nodes.Count-1];
 
@@ -241,7 +277,6 @@ namespace Assets.Scripts.SceneObjects
             msh.vertices = vertices;
             msh.triangles = indices;
             msh.normals = normals;
-
             MeshFilter meshFilter = roof.GetComponent<MeshFilter>();
             meshFilter.mesh = msh;
 
@@ -250,9 +285,9 @@ namespace Assets.Scripts.SceneObjects
 
         }
 
-        private void createRoof(BuildingRelation relation)
+        private void createRoof(BuildingRelation relation, GameObject roof)
         {
-            createRoof(relation.outerWall);
+            createRoof(relation.outerWall,roof);
         }
 
         private bool getWayOrientation(Way way)
@@ -283,6 +318,98 @@ namespace Assets.Scripts.SceneObjects
             }
 
             return _buildingHeight;
+        }
+
+        public void updateHeightMesh(float newHeight)
+        {
+            equalizedBuildingHeight = newHeight + equalizedBuildingHeight - buildingHeight;
+            buildingHeight = newHeight;
+
+            if (type == buildingType.standard)
+            {
+
+                for (int i = 0; i < way.nodes.Count - 1; i++)
+                {
+                    MeshFilter meshFilter = facades[i].GetComponent<MeshFilter>();
+                    meshFilter.mesh.vertices = getFacadeVertices(way.nodes[i], way.nodes[i + 1]);
+                }
+
+                createRoof(way, roof);
+            }
+            else if (type == buildingType.withholeInside)
+            {
+                for (int i = 0; i < relation.outerWall.nodes.Count - 1; i++)
+                {
+                    MeshFilter meshFilter = facades[i].GetComponent<MeshFilter>();
+                    meshFilter.mesh.vertices = getFacadeVertices(relation.outerWall.nodes[i], relation.outerWall.nodes[i + 1]);
+                }
+                for (int i = 0; i < relation.innerHoles.Count; i++)
+                    for (int j = 0; j < relation.innerHoles[i].nodes.Count - 1; j++)
+                    {
+                        MeshFilter meshFilter = facades[i].GetComponent<MeshFilter>();
+                        meshFilter.mesh.vertices = getFacadeVertices(relation.innerHoles[i].nodes[j], relation.innerHoles[i].nodes[j + 1]);                  
+                    }
+
+                createRoof(relation, roof);
+            }
+
+        }
+
+        private Vector3[] getFacadeVertices(Node node1, Node node2)
+        {
+            Vector3[] vertices = {
+                                     node1.meterPosition,
+                                     node2.meterPosition,
+                                     new Vector3(node2.meterPosition.x,equalizedBuildingHeight,node2.meterPosition.z),
+                                     new Vector3(node1.meterPosition.x,equalizedBuildingHeight,node1.meterPosition.z)
+                                 };
+
+            return vertices;
+        }
+
+
+        public void setMaterial(int facadeID, Texture2D colorTexture, Texture2D normalTexture, Texture2D specularTexture, string colorTex, string normalTex, string specularTex)
+        {
+            Material mat = facades[facadeID].GetComponent<MeshRenderer>().material;
+            FacadeSkin fs = new FacadeSkin();
+            fs.facadeID = facadeID;
+            fs.normalTexturePath = normalTex;
+            fs.specularTexturePath = specularTex;
+            fs.colorTexturePath = colorTex;
+            fs.bottomLeft = new Vector2(0, 0);
+            fs.bottomRight = new Vector2(0, 1);
+            fs.topLeft = new Vector2(1, 0);
+            fs.topRight = new Vector2(1, 1);
+            int facadeIndex = facadeSkins.FindIndex(item => item.facadeID == facadeID);
+            if (facadeIndex == -1)
+                facadeSkins.Add(fs);
+            else
+                facadeSkins[facadeIndex] = fs;
+
+            if (colorTexture != null)
+            {
+                mat.SetTexture("_MainTex", colorTexture);
+                mat.SetTexture("_BumpMap", normalTexture);
+                mat.SetTexture("_SpecGlossMap", specularTexture);
+            }
+        }
+
+        public void setTextureCoordinate(int facadeID, Vector2 bottomLeft, Vector2 bottomRight, Vector2 topLeft, Vector2 topRight)
+        {
+            int facadeIndex = facadeSkins.FindIndex(item => item.facadeID == facadeID);
+            FacadeSkin fs = facadeSkins[facadeIndex];
+            fs.bottomLeft = bottomLeft;
+            fs.bottomRight = bottomRight;
+            fs.topLeft = topLeft;
+            fs.topRight = topRight;
+            facadeSkins[facadeIndex] = fs;
+
+
+            MeshFilter meshFilter = facades[facadeID].GetComponent<MeshFilter>();
+            if (isClockwise)
+                meshFilter.mesh.uv = new Vector2[] { bottomLeft, bottomRight, topRight, topLeft };
+            else
+                meshFilter.mesh.uv = new Vector2[] { bottomRight, bottomLeft, topLeft, topRight };
         }
 
     }

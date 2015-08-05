@@ -73,7 +73,7 @@ namespace Assets.Scripts.Utils
 
 		    double delta = A1*B2 - A2*B1;
 
-		    if (Math.Abs(delta) < 0.001)
+		    if (Math.Abs(delta) < 0.01)
 		    {
 			    return false;
 		    }

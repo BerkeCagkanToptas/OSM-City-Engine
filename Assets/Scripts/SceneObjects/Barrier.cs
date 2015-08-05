@@ -20,7 +20,7 @@ namespace Assets.Scripts.SceneObjects
     }
 
 
-    class Barrier
+    public class Barrier
     {
         BarrierConfigurations barrierConfig;
         BarrierType type;

@@ -5,91 +5,86 @@ using UnityEngine.UI;
 using Assets.Scripts.SceneObjects;
 using Assets.Scripts.HeightMap;
 using System.IO;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
+using Assets.Scripts.ConfigHandler;
+using Assets.Scripts.UnitySideScripts.Menus;
 
 public class LoadSaveMenu : MonoBehaviour
 {
-    private bool OsmSelectBrowse = false;
-    private bool ExistingProjectSelectBrowse = false;
 
-    //initialize file browser
-    FileBrowser fb;
-    string output = "no file";
-    // Use this for initialization
+    public Scene scene;
+
+    private GameObject fileBrowser;
+    private myFileBrowserDialog fbd;
+    private bool isNewProject, isLoadProject, isSaveProject;
+
     void Start()
     {
-        fb = new FileBrowser(0);
-        GUISkin skin = (GUISkin)Resources.Load("FileBrowser/DefaultSkin");
+        fileBrowser = GameObject.Instantiate((GameObject)Resources.Load("Prefabs/Menu/FileBrowser"));
+        fileBrowser.transform.SetParent(GameObject.Find("Canvas").transform);
+        fileBrowser.SetActive(false);
+        RectTransform rt = fileBrowser.GetComponent<RectTransform>();
+        rt.anchoredPosition = new Vector2(0, 0);
+        fbd = fileBrowser.GetComponent<myFileBrowserDialog>();
 
-        fb.setGUIRect(new Rect(400, 50, 800, 500));
-        //setup file browser style
-        fb.guiSkin = skin; //set the starting skin
-        //set the various textures
-        fb.fileTexture = (Texture2D)Resources.Load("FileBrowser/Images/file");
-        fb.directoryTexture = (Texture2D)Resources.Load("FileBrowser/Images/folder");
-        fb.backTexture = (Texture2D)Resources.Load("FileBrowser/Images/back2");
-        fb.driveTexture = (Texture2D)Resources.Load("FileBrowser/Images/drive");
-        //show the search bar
-        fb.showSearch = true;
-        //search recursively (setting recursive search may cause a long delay)
-        fb.searchRecursively = true;
+        isNewProject = false;
+        isLoadProject = false;
+        isSaveProject = false;
     }
 
-    void OnGUI()
+    void Update()
     {
-        if (OsmSelectBrowse == false && ExistingProjectSelectBrowse == false)
-            return;
 
-        if (fb.draw())
-        { 
-            //true is returned when a file has been selected
-            //the output file is a member if the FileInfo class, if cancel was selected the value is null
-            
-            if (fb.outputFile == null)
+        if(fbd.state == myFileBrowserDialog.BrowserState.Selected)
+        {
+            if(isNewProject)
             {
-                Debug.Log("<color=red>Path:</color>" + "No Path Selected");
+                InputField IFnewProject = transform.Find("Panel_LoadSaveMenu").Find("InputField_SelectOSM").GetComponent<InputField>();
+                IFnewProject.text = fbd.selectedPath;
+                isNewProject = false;
             }
-            else
+            else if(isLoadProject)
             {
-                if (OsmSelectBrowse)
-                {
-                    GameObject IF_osmselectFile = GameObject.Find("InputField_SelectOSM");
-                    InputField IF_osmSelect = IF_osmselectFile.GetComponent<InputField>();
-                    IF_osmSelect.text = fb.outputFile.FullName;
-                }
-                else if(ExistingProjectSelectBrowse)
-                {
-                    GameObject loadProject = GameObject.Find("InputField_SelectProject");
-                    InputField IF_loadProject = loadProject.GetComponent<InputField>();
-                    IF_loadProject.text = fb.outputFile.ToString();
-                }
-
-                Debug.Log("<color=red>FileName:</color>" + fb.outputFile.Name);
-                Debug.Log("<color=red>Path:</color>" + fb.outputFile.ToString());
+                InputField IFloadProject = transform.Find("Panel_LoadSaveMenu").Find("InputField_SelectProject").GetComponent<InputField>();
+                IFloadProject.text = fbd.selectedPath;
+                isLoadProject = false;
             }
 
-            OsmSelectBrowse = false;
-            ExistingProjectSelectBrowse = false;
+            else if(isSaveProject)
+            {
+                string path = fbd.selectedPath + "/SAVE_" + scene.sceneName;
+                string osmPath = scene.OSMPath;
+                SaveConfig save = new SaveConfig(path, scene, osmPath);
+                save.saveConfigurations();
+                Debug.Log("Successfully Saved");
+                isSaveProject = false;
+            }
 
         }
-    }
 
+
+     
+    }
 
     public void ClickOSMBrowse()
     {
-        OsmSelectBrowse = true;
+        isNewProject = true;
+        DirectoryInfo di = new DirectoryInfo(Directory.GetCurrentDirectory());
+        fbd.draw(myFileBrowserDialog.BrowserMode.FileSelect, di, new string[]{".osm",".xml"});
     }
 
-    public void ClickOSMSelectRender(InputField _if)
+    public void ClickOSMSelectRender()
     {
-        Scene scene = new Scene();
-
-        Toggle osmStreetToggle = GameObject.Find("Toggle_OSMStreet").GetComponent<Toggle>();
-        Toggle osmStreet2Toggle = GameObject.Find("Toggle_OSMStreet2").GetComponent<Toggle>();
-        Toggle bingStreetToggle = GameObject.Find("Toggle_BingStreet").GetComponent<Toggle>();
-        Toggle bingAerialToggle = GameObject.Find("Toggle_BingAerial").GetComponent<Toggle>();
+        InputField _if = transform.Find("Panel_LoadSaveMenu").Find("InputField_SelectOSM").GetComponent<InputField>();
+           
+        Toggle osmStreetToggle = transform.Find("Panel_LoadSaveMenu").Find("Toggle_OSMStreet").GetComponent<Toggle>();
+        Toggle osmStreet2Toggle = transform.Find("Panel_LoadSaveMenu").Find("Toggle_OSMStreet2").GetComponent<Toggle>();
+        Toggle bingStreetToggle = transform.Find("Panel_LoadSaveMenu").Find("Toggle_BingStreet").GetComponent<Toggle>();
+        //Toggle bingAerialToggle = GameObject.Find("Toggle_BingAerial").GetComponent<Toggle>();
 
 
         MapProvider provider;
+        HeightmapContinent continent = HeightmapContinent.Eurasia;
 
         if (osmStreetToggle.isOn)
             provider = MapProvider.OpenStreetMap;
@@ -102,22 +97,32 @@ public class LoadSaveMenu : MonoBehaviour
 
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
-        string extension = Path.GetExtension(_if.text);
-        if((extension == ".xml" || extension == ".osm") && File.Exists(_if.text))
-            scene.initializeScene(_if.text, HeightmapContinent.Eurasia, provider);
+        scene = new Scene();
+        scene.initializeScene(_if.text, continent, provider);
         stopwatch.Stop();
         Debug.Log("<color=blue>TOTAL TIME:</color>" + stopwatch.ElapsedMilliseconds);
     }
 
     public void ClickLoadProjectRender()
     {
-
+        InputField _if = transform.Find("Panel_LoadSaveMenu").Find("InputField_SelectProject").GetComponent<InputField>();         
+        LoadConfig loadConfig = new LoadConfig(_if.text);
+        scene = new Scene();
+        scene.loadProject(loadConfig.sceneSave);
     }
 
     public void ClickLoadProjectBrowse()
     {
-        ExistingProjectSelectBrowse = true;
+        isLoadProject = true;
+        DirectoryInfo di = new DirectoryInfo(Directory.GetCurrentDirectory());
+        fbd.draw(myFileBrowserDialog.BrowserMode.FileSelect, di, new string[] { ".xml" });
     }
 
+    public void ClickSaveProject()
+    {
+        isSaveProject = true;
+        DirectoryInfo di = new DirectoryInfo(Directory.GetCurrentDirectory());
+        fbd.draw(myFileBrowserDialog.BrowserMode.FolderSelect, di, new string[] { ".xml" });
+    }
 
 }

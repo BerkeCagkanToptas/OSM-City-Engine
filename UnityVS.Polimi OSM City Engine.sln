@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityVS.Polimi OSM City Engine.CSharp.Plugins", "UnityVS.Polimi OSM City Engine.CSharp.Plugins.csproj", "{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityVS.Polimi OSM City Engine.CSharp", "UnityVS.Polimi OSM City Engine.CSharp.csproj", "{1E576229-CD51-FAF5-00E9-9CD702B3968E}"
 EndProject
 Global
@@ -9,6 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E576229-CD51-FAF5-00E9-9CD702B3968E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E576229-CD51-FAF5-00E9-9CD702B3968E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E576229-CD51-FAF5-00E9-9CD702B3968E}.Release|Any CPU.ActiveCfg = Release|Any CPU

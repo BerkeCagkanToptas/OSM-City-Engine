@@ -8,6 +8,7 @@ using Assets.Scripts.ConfigHandler;
 using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
 using System.IO;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
 
 namespace Assets.Scripts.SceneObjects
 {
@@ -23,42 +24,34 @@ namespace Assets.Scripts.SceneObjects
     }
 
 
-    class Scene
+    public class Scene
     {
         public BBox scenebbox;
         
-        public List<Area> areaList;
-
         public List<Highway> highwayList;
-        private List<Way> WayListforHighway;
-
-        public List<Building> buildingList;
-        private List<Way> WayListforBuilding;
-        private List<BuildingRelation> RelationListforBuilding;
-
+        public List<Pavement> pavementList;      
+        public List<Building> buildingList;       
         public List<Barrier> barrierList;
-        public List<GameObject> treeList;
-        public List<GameObject> trafficLightList;
+        private List<Object3D> defaultTreeList;
+        public List<Object3D> object3DList;
+
         public myTerrain terrain;
         public InitialConfigurations config;
 
-        private HeighmapLoader heightMap;
+        public HighwayModeller highwayModeller;
         private OSMXml osmxml;
-
-        private InitialConfigLoader configloader;
-
+        public HeightmapContinent continent;
+        public MapProvider provider;
+        public string sceneName;
+        public string OSMPath;
+       
 
         public Scene()
         {
-            buildingList = new List<Building>();
-            areaList = new List<Area>();
-            WayListforHighway = new List<Way>();
-            WayListforBuilding = new List<Way>();
+            buildingList = new List<Building>();          
             barrierList = new List<Barrier>();
-            treeList = new List<GameObject>();
-            trafficLightList = new List<GameObject>();
-
-            configloader = new InitialConfigLoader();
+            defaultTreeList = new List<Object3D>();
+            object3DList = new List<Object3D>();
         }
 
         /// <summary>
@@ -70,15 +63,26 @@ namespace Assets.Scripts.SceneObjects
         /// Specify Continent to download correct Heightmap from Nasa Srtm Data
         /// <param name="provider"></param>
         /// Choose mapProvider to select Texture of Terrain
-        public void initializeScene(string OSMfilename, HeightmapContinent continent, MapProvider provider)
+        public void initializeScene(string OSMfilename, HeightmapContinent _continent, MapProvider _provider)
         {
- 
+            string[] subStr = OSMfilename.Split(new char[] { '/', '\\' });
+            sceneName = subStr[subStr.Length - 1];
+            OSMPath = OSMfilename;
+
+            continent = _continent;
+            provider = _provider;
+
+            List<Way> WayListforHighway = new List<Way>();
+            List<Way> WayListforBuilding = new List<Way>();
+
+            InitialConfigLoader configloader = new InitialConfigLoader();
+
             OSMparser parser = new OSMparser();
             scenebbox = parser.readBBox(OSMfilename);
             scenebbox = editbbox(scenebbox);
             config = configloader.loadInitialConfig();
 
-            heightMap = new HeighmapLoader(scenebbox, continent);
+            HeightmapLoader heightMap = new HeightmapLoader(scenebbox, continent);
             terrain = new myTerrain(heightMap, scenebbox, OSMfilename, provider);
             osmxml = parser.parseOSM(OSMfilename);
             assignNodePositions();
@@ -100,7 +104,83 @@ namespace Assets.Scripts.SceneObjects
                         WayListforHighway.Add(w);
                         break;
                     case wayType.area:
-                        areaList.Add(new Area(w, config.areaConfig));
+                        break;
+                    case wayType.barrier:
+                        barrierList.Add(new Barrier(w, config.barrierConfig));
+                        break;
+                    case wayType.river:
+                        highwayList.Add(new Highway(w, config.highwayConfig, terrain));
+                        break;
+                    case wayType.none:
+                        break;
+                }
+            }
+            
+            highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
+            highwayModeller.renderHighwayList();
+            highwayModeller.renderPavementList();
+            highwayList = highwayModeller.highwayList;
+            pavementList = highwayModeller.pavementList;
+
+            BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
+            buildingListModeller.renderBuildingList();
+            buildingList = buildingListModeller.buildingList;
+
+           
+            Debug.Log("<color=red>Scene Info:</color> BuildingCount:" + buildingList.Count.ToString() + " HighwayCount:" + highwayList.Count);
+
+        }
+
+        public void loadProject(SceneSave save)
+        {
+            List<Way> WayListforHighway = new List<Way>();
+            List<Way> WayListforBuilding = new List<Way>();
+
+            InitialConfigLoader configloader = new InitialConfigLoader();
+
+            OSMparser parser = new OSMparser();
+            scenebbox = parser.readBBox(save.osmPath);
+            scenebbox = editbbox(scenebbox);
+            config = configloader.loadInitialConfig(); //--> Maybe it is better to include config to SaveProject file
+
+            HeightmapLoader heightMap = new HeightmapLoader(scenebbox, save.continent);
+            terrain = new myTerrain(heightMap, scenebbox, save.osmPath, save.provider);
+            osmxml = parser.parseOSM(save.osmPath);
+            assignNodePositions();
+
+            drawTrees(osmxml.treeList);
+
+            //3D OBJECT LOAD
+            for(int i = 0 ; i < save.objectSaveList.Count ; i++)
+            {
+                Object3D obj = new Object3D();
+                obj.name = save.objectSaveList[i].name;
+                obj.object3D = (GameObject)MonoBehaviour.Instantiate(Resources.Load(save.objectSaveList[i].resourcePath));
+                obj.object3D.AddComponent<Object3dMouseHandler>();
+                obj.resourcePath = save.objectSaveList[i].resourcePath;
+                obj.object3D.transform.position = save.objectSaveList[i].translate;
+                obj.object3D.transform.localScale = save.objectSaveList[i].scale;
+                Quaternion quat = new Quaternion();
+                quat.eulerAngles = save.objectSaveList[i].rotate;
+                obj.object3D.transform.rotation = quat;
+                obj.object3D.name = obj.name;
+                obj.object3D.tag = "3DObject";
+                object3DList.Add(obj);
+            }
+
+            for (int k = 0; k < osmxml.wayList.Count; k++)
+            {
+                Way w = osmxml.wayList[k];
+
+                switch (getWayTpe(w))
+                {
+                    case wayType.building:
+                        WayListforBuilding.Add(w);
+                        break;
+                    case wayType.highway:
+                        WayListforHighway.Add(w);
+                        break;
+                    case wayType.area:
                         break;
                     case wayType.barrier:
                         barrierList.Add(new Barrier(w, config.barrierConfig));
@@ -113,20 +193,15 @@ namespace Assets.Scripts.SceneObjects
                 }
             }
 
-            //HighwayListModeller highwayListModeller = new HighwayListModeller(WayListforHighway, terrain, config.highwayConfig);
-            //highwayListModeller.renderHighwayList();
-            //highwayList = highwayListModeller.highwayList;
-
-            HighwayModeller highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
+            highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
             highwayModeller.renderHighwayList();
+            highwayModeller.renderPavementList();
             highwayList = highwayModeller.highwayList;
+            pavementList = highwayModeller.pavementList;
 
             BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
             buildingListModeller.renderBuildingList();
             buildingList = buildingListModeller.buildingList;
-
-           
-            Debug.Log("<color=red>Scene Info:</color> BuildingCount:" + buildingList.Count.ToString() + " HighwayCount:" + highwayList.Count);
 
         }
 
@@ -237,10 +312,17 @@ namespace Assets.Scripts.SceneObjects
         {
             for (int i = 0; i < _treeList.Count; i++)
             {
-                GameObject tree = (GameObject) MonoBehaviour.Instantiate(Resources.Load("Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeaf_Desktop"));
-                tree.transform.position = _treeList[i].meterPosition;
-                treeList.Add(tree);
+                Object3D obj = new Object3D();
+                obj.name = "Broad Leaf Tree";
+                obj.type = ObjectType.Tree;
+                obj.resourcePath = "Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeafDesktopPrefab";
+                obj.object3D = (GameObject) MonoBehaviour.Instantiate(Resources.Load("Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeafDesktopPrefab"));
+                obj.object3D.AddComponent<Object3dMouseHandler>();                
+                obj.object3D.transform.position = _treeList[i].meterPosition;
+                obj.object3D.tag = "3DObject";
+                obj.object3D.name = "Broad Leaf Tree";
                 
+                defaultTreeList.Add(obj);            
             }
         }
 
