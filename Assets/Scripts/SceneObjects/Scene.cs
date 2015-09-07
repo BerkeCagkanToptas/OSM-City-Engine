@@ -13,17 +13,6 @@ using Assets.Scripts.UnitySideScripts.MouseScripts;
 namespace Assets.Scripts.SceneObjects
 {
 
-    enum wayType
-    {
-        building,
-        highway,
-        area,
-        barrier,
-        river,
-        none
-    }
-
-
     public class Scene
     {
         public BBox scenebbox;
@@ -32,7 +21,7 @@ namespace Assets.Scripts.SceneObjects
         public List<Pavement> pavementList;      
         public List<Building> buildingList;       
         public List<Barrier> barrierList;
-        private List<Object3D> defaultTreeList;
+        public List<Object3D> defaultObject3DList;
         public List<Object3D> object3DList;
 
         public myTerrain terrain;
@@ -50,7 +39,7 @@ namespace Assets.Scripts.SceneObjects
         {
             buildingList = new List<Building>();          
             barrierList = new List<Barrier>();
-            defaultTreeList = new List<Object3D>();
+            defaultObject3DList = new List<Object3D>();
             object3DList = new List<Object3D>();
         }
 
@@ -77,55 +66,86 @@ namespace Assets.Scripts.SceneObjects
 
             InitialConfigLoader configloader = new InitialConfigLoader();
 
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
             OSMparser parser = new OSMparser();
             scenebbox = parser.readBBox(OSMfilename);
             scenebbox = editbbox(scenebbox);
             config = configloader.loadInitialConfig();
 
+            stopwatch.Stop();
+            Debug.Log("<color=blue>PARSING TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
+
             HeightmapLoader heightMap = new HeightmapLoader(scenebbox, continent);
             terrain = new myTerrain(heightMap, scenebbox, OSMfilename, provider);
+
             osmxml = parser.parseOSM(OSMfilename);
             assignNodePositions();
 
+            stopwatch.Stop();
+            Debug.Log("<color=blue>TERRAIN RENDER TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
 
-            drawTrees(osmxml.treeList);
+
+            defaultObject3DList = DefaultObject3DHandler.drawDefaultObjects(osmxml.defaultobject3DList);
+
+            stopwatch.Stop();
+            Debug.Log("<color=blue>3D OBJECT RENDER TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
 
 
             for (int k = 0; k < osmxml.wayList.Count; k++)
             {
                 Way w = osmxml.wayList[k];
 
-                switch (getWayTpe(w))
+                switch (w.type)
                 {
-                    case wayType.building:
+                    case ItemEnumerator.wayType.building:
                         WayListforBuilding.Add(w);     
                         break;
-                    case wayType.highway:
+                    case ItemEnumerator.wayType.highway:
                         WayListforHighway.Add(w);
                         break;
-                    case wayType.area:
+                    case ItemEnumerator.wayType.area:
                         break;
-                    case wayType.barrier:
+                    case ItemEnumerator.wayType.barrier:
                         barrierList.Add(new Barrier(w, config.barrierConfig));
                         break;
-                    case wayType.river:
+                    case ItemEnumerator.wayType.river:
                         highwayList.Add(new Highway(w, config.highwayConfig, terrain));
                         break;
-                    case wayType.none:
+                    case ItemEnumerator.wayType.none:
                         break;
                 }
             }
-            
+
+            stopwatch.Stop();
+            Debug.Log("<color=blue>ITEM ENUMERATING TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
+
             highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
             highwayModeller.renderHighwayList();
             highwayModeller.renderPavementList();
             highwayList = highwayModeller.highwayList;
             pavementList = highwayModeller.pavementList;
 
+            stopwatch.Stop();
+            Debug.Log("<color=blue>HIGHWAY RENDERING TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
+
             BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
             buildingListModeller.renderBuildingList();
             buildingList = buildingListModeller.buildingList;
 
+            stopwatch.Stop();
+            Debug.Log("<color=blue>BUILDING RENDERING TIME:</color>" + stopwatch.ElapsedMilliseconds);
            
             Debug.Log("<color=red>Scene Info:</color> BuildingCount:" + buildingList.Count.ToString() + " HighwayCount:" + highwayList.Count);
 
@@ -148,7 +168,7 @@ namespace Assets.Scripts.SceneObjects
             osmxml = parser.parseOSM(save.osmPath);
             assignNodePositions();
 
-            drawTrees(osmxml.treeList);
+            defaultObject3DList = DefaultObject3DHandler.drawDefaultObjects(osmxml.defaultobject3DList);
 
             //3D OBJECT LOAD
             for(int i = 0 ; i < save.objectSaveList.Count ; i++)
@@ -172,23 +192,23 @@ namespace Assets.Scripts.SceneObjects
             {
                 Way w = osmxml.wayList[k];
 
-                switch (getWayTpe(w))
+                switch (w.type)
                 {
-                    case wayType.building:
+                    case ItemEnumerator.wayType.building:
                         WayListforBuilding.Add(w);
                         break;
-                    case wayType.highway:
+                    case ItemEnumerator.wayType.highway:
                         WayListforHighway.Add(w);
                         break;
-                    case wayType.area:
+                    case ItemEnumerator.wayType.area:
                         break;
-                    case wayType.barrier:
+                    case ItemEnumerator.wayType.barrier:
                         barrierList.Add(new Barrier(w, config.barrierConfig));
                         break;
-                    case wayType.river:
+                    case ItemEnumerator.wayType.river:
                         highwayList.Add(new Highway(w, config.highwayConfig, terrain));
                         break;
-                    case wayType.none:
+                    case ItemEnumerator.wayType.none:
                         break;
                 }
             }
@@ -199,54 +219,10 @@ namespace Assets.Scripts.SceneObjects
             highwayList = highwayModeller.highwayList;
             pavementList = highwayModeller.pavementList;
 
-            BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
+            BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig,save.buildingSaveList);
             buildingListModeller.renderBuildingList();
             buildingList = buildingListModeller.buildingList;
 
-        }
-
-        //Seperate WayType of OSM into our City Engine object types
-        private wayType getWayTpe(Way way)
-        {
-            if (way.tags == null)
-                return wayType.none;
-
-            foreach(Tag t in way.tags)
-            {
-                if (t.k == "building")
-                    return wayType.building;
-                else if (t.k == "barrier")
-                    return wayType.barrier;
-                else if (t.k == "highway" || t.k == "railway")
-                {
-                    if (t.v == "footway")
-                        return wayType.none;
-
-                    return wayType.highway;
-                }
-                else if (t.k == "landuse" || t.k == "leisure")
-                    return wayType.area;
-                else if (t.k == "amenity")
-                {
-                    for (int k = 0; k < way.tags.Count; k++)
-                    {
-                        if (way.tags[k].k == "building")
-                            return wayType.building;
-                    }
-                    return wayType.area;
-                }
-                else if (t.k == "waterway" && t.v == "river")
-                    return wayType.highway; //return wayType.river;
-
-                else if (t.k == "historic" && t.v == "monument")
-                    return wayType.area;
-                else if (t.k == "historic" && (t.v == "citywalls" || t.v == "city_gate"))
-                    return wayType.barrier;
-
-            }
-      
-
-            return wayType.none;
         }
 
         //Converts Spherical Mercator Coordinates to Unity Coordinates
@@ -281,15 +257,15 @@ namespace Assets.Scripts.SceneObjects
 
             }
 
-            for(int i = 0 ; i < osmxml.treeList.Count ; i++)
+            for(int i = 0 ; i < osmxml.defaultobject3DList.Count ; i++)
             {
-                Node nd = osmxml.treeList[i];
+                Node nd = osmxml.defaultobject3DList[i];
                 Vector2 meterCoord = proj.LatLontoMeters(nd.lat, nd.lon);
                 Vector2 shift = new Vector2(scenebbox.meterBottom, scenebbox.meterLeft);
                 meterCoord = meterCoord - shift;
                 float height = terrain.getTerrainHeight(nd.lat, nd.lon);
                 nd.meterPosition = new Vector3(meterCoord.y, height, meterCoord.x);
-                osmxml.treeList[i] = nd;
+                osmxml.defaultobject3DList[i] = nd;
             }
 
         }
@@ -305,25 +281,6 @@ namespace Assets.Scripts.SceneObjects
             bbox.meterTop = topright.x;
             bbox.meterRight = topright.y;
             return bbox;
-        }
-
-        //Draw Trees in the scene
-        private void drawTrees(List<Node> _treeList)
-        {
-            for (int i = 0; i < _treeList.Count; i++)
-            {
-                Object3D obj = new Object3D();
-                obj.name = "Broad Leaf Tree";
-                obj.type = ObjectType.Tree;
-                obj.resourcePath = "Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeafDesktopPrefab";
-                obj.object3D = (GameObject) MonoBehaviour.Instantiate(Resources.Load("Prefabs/Environment/SpeedTree/BroadLeaf/BroadLeafDesktopPrefab"));
-                obj.object3D.AddComponent<Object3dMouseHandler>();                
-                obj.object3D.transform.position = _treeList[i].meterPosition;
-                obj.object3D.tag = "3DObject";
-                obj.object3D.name = "Broad Leaf Tree";
-                
-                defaultTreeList.Add(obj);            
-            }
         }
 
 

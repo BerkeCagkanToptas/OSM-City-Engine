@@ -27,9 +27,9 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
         }
 
         List<objectListItem> carObjectList;
-        List<objectListItem> treeObjectList;
+        List<objectListItem> environmentObjectList;
         List<objectListItem> barrierObjectList;
-        List<objectListItem> trafficSignObjectList;
+        List<objectListItem> cityRelatedObjectList;
 
         Transform contentPanel;
 
@@ -39,7 +39,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
         {
             transform.gameObject.SetActive(true);
 
-            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT CAR";
+            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT VEHICLE OBJECT";
 
             if(contentPanel == null)
                 contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");
@@ -68,7 +68,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
         public void fillTreeList()
         {
             transform.gameObject.SetActive(true);
-            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT TREE";
+            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT ENVIRONMENT OBJECT";
 
             if (contentPanel == null)
                 contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");
@@ -78,17 +78,27 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
             children.ForEach(child => Destroy(child));
 
 
-            treeObjectList = new List<objectListItem>();
-            objectListItem obj1 = new objectListItem("Broadleaf 1", "Prefabs/Environment/SpeedTree/Broadleaf/broadLeafDesktopIcon", "Prefabs/Environment/SpeedTree/Broadleaf/BroadleafDesktopPrefab");
-            treeObjectList.Add(obj1);
-            objectListItem obj2 = new objectListItem("Broadleaf 2", "Prefabs/Environment/SpeedTree/Broadleaf/broadLeafMobileIcon", "Prefabs/Environment/SpeedTree/Broadleaf/BroadleafMobilePrefab");
-            treeObjectList.Add(obj2);
-            objectListItem obj3 = new objectListItem("Conifer", "Prefabs/Environment/SpeedTree/Conifer/coniferIcon", "Prefabs/Environment/SpeedTree/Conifer/ConiferPrefab");
-            treeObjectList.Add(obj3);
-            objectListItem obj4 = new objectListItem("Palm", "Prefabs/Environment/SpeedTree/Palm/palmIcon", "Prefabs/Environment/SpeedTree/Palm/PalmPrefab");
-            treeObjectList.Add(obj4);
-            objectListItem obj5 = new objectListItem("Tree 5", "Prefabs/Environment/Tree5/Tree5Icon", "Prefabs/Environment/Tree5/Tree5Prefab");
-            treeObjectList.Add(obj5);
+            environmentObjectList = new List<objectListItem>();
+            objectListItem obj1 = new objectListItem("Broadleaf 1", "Prefabs/Environment/Icons/broadLeafDesktopIcon", "Prefabs/Environment/Prefabs/BroadleafDesktop");
+            environmentObjectList.Add(obj1);
+            objectListItem obj2 = new objectListItem("Broadleaf 2", "Prefabs/Environment/Icons/broadLeafMobileIcon", "Prefabs/Environment/Prefabs/BroadleafMobile");
+            environmentObjectList.Add(obj2);
+            objectListItem obj3 = new objectListItem("Conifer", "Prefabs/Environment/Icons/coniferIcon", "Prefabs/Environment/Prefabs/Conifer");
+            environmentObjectList.Add(obj3);
+            objectListItem obj4 = new objectListItem("Palm", "Prefabs/Environment/Icons/palmIcon", "Prefabs/Environment/Prefabs/Palm");
+            environmentObjectList.Add(obj4);
+            objectListItem obj5 = new objectListItem("Tree 5", "Prefabs/Environment/Icons/Tree5Icon", "Prefabs/Environment/Prefabs/Tree5");
+            environmentObjectList.Add(obj5);
+            objectListItem obj6 = new objectListItem("Fountain 1", "Prefabs/Environment/Icons/Fountain1", "Prefabs/Environment/Prefabs/Fountain1");
+            environmentObjectList.Add(obj6);
+            objectListItem obj7 = new objectListItem("Fountain 2", "Prefabs/Environment/Icons/Fountain2", "Prefabs/Environment/Prefabs/Fountain2");
+            environmentObjectList.Add(obj7);
+            objectListItem obj8 = new objectListItem("Sculpture 1", "Prefabs/Environment/Icons/Sculpture1", "Prefabs/Environment/Prefabs/Sculpture1");
+            environmentObjectList.Add(obj8);
+            objectListItem obj9 = new objectListItem("Sculpture 2", "Prefabs/Environment/Icons/Sculpture2", "Prefabs/Environment/Prefabs/Sculpture2");
+            environmentObjectList.Add(obj9);
+            objectListItem obj10 = new objectListItem("Sculpture 3", "Prefabs/Environment/Icons/Sculpture3", "Prefabs/Environment/Prefabs/Sculpture3");
+            environmentObjectList.Add(obj10);
 
             fillScrollRect(ObjectType.Tree);
 
@@ -98,7 +108,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
         public void fillBarrierList()
         {
             transform.gameObject.SetActive(true);
-            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT BARRIER";
+            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT BARRIER OBJECT";
 
             if (contentPanel == null)
                 contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");
@@ -119,7 +129,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
         public void fillTrafficSignList()
         {
             transform.gameObject.SetActive(true);
-            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT TRAFFIC SIGN";
+            transform.Find("Panel").Find("LabelTitle").GetComponent<Text>().text = "SELECT CITY RELATED OBJECT";
 
             if (contentPanel == null)
                 contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");
@@ -128,14 +138,21 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
             foreach (Transform child in contentPanel) children.Add(child.gameObject);
             children.ForEach(child => Destroy(child));
 
-            trafficSignObjectList = new List<objectListItem>();
-            objectListItem obj1 = new objectListItem("Traffic Light 1", "Prefabs/TrafficSign/TrafficLight1/TrafficLight1Icon", "Prefabs/TrafficSign/TrafficLight1/TrafficLight1Prefab");
-            trafficSignObjectList.Add(obj1);
-            objectListItem obj2 = new objectListItem("Traffic Light 2", "Prefabs/TrafficSign/TrafficLight2/TrafficLight2Icon", "Prefabs/TrafficSign/TrafficLight2/TrafficLight2Prefab");
-            trafficSignObjectList.Add(obj2);
-            objectListItem obj3 = new objectListItem("Traffic Light 3", "Prefabs/TrafficSign/TrafficLight3/TrafficLight3Icon", "Prefabs/TrafficSign/TrafficLight3/TrafficLight3Prefab");
-            trafficSignObjectList.Add(obj3);
-
+            cityRelatedObjectList = new List<objectListItem>();
+            objectListItem obj1 = new objectListItem("Traffic Light 1", "Prefabs/CityRelated/Icons/TrafficLight1Icon", "Prefabs/CityRelated/Prefabs/TrafficLight1Prefab");
+            cityRelatedObjectList.Add(obj1);
+            objectListItem obj2 = new objectListItem("Traffic Light 2", "Prefabs/CityRelated/Icons/TrafficLight2Icon", "Prefabs/CityRelated/Prefabs/TrafficLight2Prefab");
+            cityRelatedObjectList.Add(obj2);
+            objectListItem obj3 = new objectListItem("Traffic Light 3", "Prefabs/CityRelated/Icons/TrafficLight3Icon", "Prefabs/CityRelated/Prefabs/TrafficLight3Prefab");
+            cityRelatedObjectList.Add(obj3);
+            objectListItem obj4 = new objectListItem("Street Lamp", "Prefabs/CityRelated/Icons/StreetLamp", "Prefabs/CityRelated/Prefabs/StreetLampPrefab");
+            cityRelatedObjectList.Add(obj4);
+            objectListItem obj5 = new objectListItem("Phone Box", "Prefabs/CityRelated/Icons/PhoneBox", "Prefabs/CityRelated/Prefabs/PhoneBoxPrefab");
+            cityRelatedObjectList.Add(obj5);
+            objectListItem obj6 = new objectListItem("Garden Chair", "Prefabs/CityRelated/Icons/GardenChair", "Prefabs/CityRelated/Prefabs/GardenChairPrefab");
+            cityRelatedObjectList.Add(obj6);
+            objectListItem obj7 = new objectListItem("Hydrant", "Prefabs/CityRelated/Icons/Hydrant", "Prefabs/CityRelated/Prefabs/HydrantPrefab");           
+            cityRelatedObjectList.Add(obj7);
             fillScrollRect(ObjectType.TrafficSign);
 
         }
@@ -176,10 +193,10 @@ namespace Assets.Scripts.UnitySideScripts.Menus.AddObjectMenu
                     objList = carObjectList;
                     break;
                 case ObjectType.TrafficSign:
-                    objList = trafficSignObjectList;
+                    objList = cityRelatedObjectList;
                     break;
                 case ObjectType.Tree :
-                    objList = treeObjectList;
+                    objList = environmentObjectList;
                     break;
                 case ObjectType.Wall :
                     objList = barrierObjectList;

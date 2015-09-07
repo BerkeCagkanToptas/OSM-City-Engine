@@ -75,7 +75,7 @@ namespace Assets.Scripts.UnitySideScripts
             if (Input.GetKeyDown(KeyCode.LeftShift))
                 CameraSpeed = 200.0f;
             if (Input.GetKeyUp(KeyCode.LeftShift))
-                CameraSpeed = 20.0f;
+                CameraSpeed = 50.0f;
 
             dir.Normalize();
             transform.Translate(dir * CameraSpeed * Time.deltaTime);

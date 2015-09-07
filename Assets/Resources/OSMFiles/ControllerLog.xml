@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DataLog> 
+ <CameraLogging frameRate="2">
+  <dataEntry no="1" steer="0.0" torque="0.0" rotX="65.323" rotY="5.432" rotZ="17.85" lat="45.867234" lon="9.100122" > </dataEntry>
+  <dataEntry no="2" steer="0.0" torque="4.89" rotX="63.445" rotY="3.168" rotZ="17.85" lat="45.867236" lon="9.100123" > </dataEntry> 
+  <dataEntry no="3" steer="0.0" torque="11.23" rotX="60.914" rotY="3.241" rotZ="17.85" lat="45.867238" lon="9.100123" > </dataEntry> 
+  <dataEntry no="4" steer="0.0" torque="23.61" rotX="58.271" rotY="10.952" rotZ="17.85" lat="45.867241" lon="9.100123" > </dataEntry> 
+  <dataEntry no="5" steer="-5.3" torque="40.19" rotX="54.412" rotY="10.869" rotZ="17.85" lat="45.867245" lon="9.100125" > </dataEntry> 
+  <dataEntry no="6" steer="0.0" torque="45.32" rotX="60.123" rotY="7.462" rotZ="17.85" lat="45.867246" lon="9.100126" > </dataEntry> 
+  <dataEntry no="7" steer="0.0" torque="43.64" rotX="55.958" rotY="6.749" rotZ="17.85" lat="45.867247" lon="9.100126" > </dataEntry> 
+  <dataEntry no="8" steer="0.0" torque="44.98" rotX="65.323" rotY="7.781" rotZ="17.85" lat="45.867248" lon="9.100127" > </dataEntry> 
+  <dataEntry no="9" steer="20.18" torque="30.32" rotX="45.126" rotY="5.384" rotZ="17.85" lat="45.867248" lon="9.100124" > </dataEntry> 
+  <dataEntry no="10" steer="25.23" torque="21.45" rotX="30.861" rotY="1.012" rotZ="17.85" lat="45.867246" lon="9.100120" > </dataEntry> 
+  <dataEntry no="11" steer="10.0" torque="27.78" rotX="18.528" rotY="-3.323" rotZ="17.85" lat="45.867244" lon="9.100118" > </dataEntry> 
+  <dataEntry no="12" steer="0.0" torque="35.32" rotX="65.323" rotY="-3.446" rotZ="17.85" lat="45.867240" lon="9.100116" > </dataEntry> 
+  <dataEntry no="13" steer="0.0" torque="43.12" rotX="65.323" rotY="1.643" rotZ="17.85" lat="45.867237" lon="9.100112" > </dataEntry> 
+ </CameraLogging>
+ <LaserLogging frameRate ="1">
+  <dataEntry no="1" steer="0.0" torque="0.0" rotX="65.323" rotY="5.432" rotZ="17.85" lat="45.867234" lon="9.100122" > </dataEntry>
+  <dataEntry no="2" steer="0.0" torque="11.23" rotX="60.914" rotY="3.241" rotZ="17.85" lat="45.867238" lon="9.100123" > </dataEntry> 
+  <dataEntry no="3" steer="-5.3" torque="40.19" rotX="54.412" rotY="10.869" rotZ="17.85" lat="45.867245" lon="9.100125" > </dataEntry> 
+  <dataEntry no="4" steer="0.0" torque="43.64" rotX="55.958" rotY="6.749" rotZ="17.85" lat="45.867247" lon="9.100126" > </dataEntry> 
+  <dataEntry no="5" steer="20.18" torque="30.32" rotX="45.126" rotY="5.384" rotZ="17.85" lat="45.867248" lon="9.100124" > </dataEntry> 
+  <dataEntry no="6" steer="10.0" torque="27.78" rotX="18.528" rotY="-3.323" rotZ="17.85" lat="45.867244" lon="9.100118" > </dataEntry> 
+  <dataEntry no="7" steer="0.0" torque="43.12" rotX="65.323" rotY="1.643" rotZ="17.85" lat="45.867237" lon="9.100112" > </dataEntry> 
+ </LaserLogging>
+</DataLog>
+
+
+
+
+

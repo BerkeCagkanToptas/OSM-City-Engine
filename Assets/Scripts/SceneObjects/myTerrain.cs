@@ -69,12 +69,17 @@ namespace Assets.Scripts.SceneObjects
             if ((rightIndex - leftIndex) % 2 != 0)
                 rightIndex++;
 
-            int topIndex = (int)Math.Floor(((float)Math.Ceiling(scenebbox.top) - scenebbox.top) * 1200.0f);
-            int bottomIndex = (int)Math.Ceiling(((float)Math.Ceiling(scenebbox.bottom) - scenebbox.bottom) * 1200.0f);
+            int topIndex, bottomIndex;
+
+ 
+            topIndex = (int)Math.Floor(((float)Math.Ceiling(scenebbox.top) - scenebbox.top) * 1200.0f);
+            bottomIndex = (int)Math.Ceiling(((float)Math.Ceiling(scenebbox.bottom) - scenebbox.bottom) * 1200.0f);
 
             if ((bottomIndex - topIndex) % 2 != 0)
-                topIndex--;
+                topIndex -= 1;
 
+
+            
 
             Debug.Log("<color=yellow>TERRAIN:</color>" + "left:" + leftIndex + " right:" + rightIndex
                        + " bottom:" + bottomIndex + " top:" + topIndex);

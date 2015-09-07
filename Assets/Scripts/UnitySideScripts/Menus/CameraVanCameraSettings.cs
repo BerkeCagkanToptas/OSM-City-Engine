@@ -15,7 +15,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus
         public struct CameraSettingItem
         {
             public string id;
-            public float yaw, pitch;
+            public float yaw, pitch, roll;
             public Vector3 position;
             public float fieldOfView;
             public int frameRate;
@@ -44,7 +44,8 @@ namespace Assets.Scripts.UnitySideScripts.Menus
                     item.id = panel.Find("TextID").GetComponent<Text>().text;
                     item.pitch = float.Parse(panel.Find("IFpitch").GetComponent<InputField>().text);
                     item.yaw = float.Parse(panel.Find("IFYaw").GetComponent<InputField>().text);
-                    item.fieldOfView = panel.Find("Slider").GetComponent<Slider>().value;
+                    item.roll = float.Parse(panel.Find("IFRoll").GetComponent<InputField>().text);
+                    item.fieldOfView = float.Parse(panel.Find("IFfov").GetComponent<InputField>().text);
                     float posX = float.Parse(panel.Find("IFposX").GetComponent<InputField>().text);
                     float posY = float.Parse(panel.Find("IFposY").GetComponent<InputField>().text);
                     float posZ = float.Parse(panel.Find("IFposZ").GetComponent<InputField>().text);

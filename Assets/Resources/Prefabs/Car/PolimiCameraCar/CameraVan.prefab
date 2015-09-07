@@ -305,7 +305,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 181842}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -340.084473, y: 337.652466, z: -17.8971367}
+  m_LocalPosition: {x: 846.727051, y: 442.553528, z: -17.8971367}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 468454}
@@ -919,7 +919,7 @@ MonoBehaviour:
   - {fileID: 463934}
   - {fileID: 446278}
   centerOfMass: {fileID: 428058}
-  maxTorque: 400
+  enginePower: 100
 --- !u!146 &14616566
 WheelCollider:
   m_ObjectHideFlags: 1

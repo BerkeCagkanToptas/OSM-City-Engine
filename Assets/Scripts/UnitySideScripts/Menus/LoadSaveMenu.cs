@@ -14,8 +14,8 @@ public class LoadSaveMenu : MonoBehaviour
 
     public Scene scene;
 
-    private GameObject fileBrowser;
-    private myFileBrowserDialog fbd;
+    private GameObject fileBrowser, fileBrowserSave;
+    private myFileBrowserDialog fbd, fbdSave;
     private bool isNewProject, isLoadProject, isSaveProject;
 
     void Start()
@@ -52,9 +52,9 @@ public class LoadSaveMenu : MonoBehaviour
 
             else if(isSaveProject)
             {
-                string path = fbd.selectedPath + "/SAVE_" + scene.sceneName;
+                string path = fbd.selectedPath + "/" + fbd.saveName;
                 string osmPath = scene.OSMPath;
-                SaveConfig save = new SaveConfig(path, scene, osmPath);
+                SaveConfig save = new SaveConfig(path, scene);
                 save.saveConfigurations();
                 Debug.Log("Successfully Saved");
                 isSaveProject = false;
@@ -82,25 +82,35 @@ public class LoadSaveMenu : MonoBehaviour
         Toggle bingStreetToggle = transform.Find("Panel_LoadSaveMenu").Find("Toggle_BingStreet").GetComponent<Toggle>();
         //Toggle bingAerialToggle = GameObject.Find("Toggle_BingAerial").GetComponent<Toggle>();
 
+        Toggle euroAsiaToggle = transform.Find("Panel_LoadSaveMenu").Find("ToggleEuroAsia").GetComponent<Toggle>();
+        Toggle australiaToggle = transform.Find("Panel_LoadSaveMenu").Find("ToggleAustralia").GetComponent<Toggle>();
+        Toggle africaToggle = transform.Find("Panel_LoadSaveMenu").Find("ToggleAfrica").GetComponent<Toggle>();
+
 
         MapProvider provider;
-        HeightmapContinent continent = HeightmapContinent.Eurasia;
+        HeightmapContinent continent;
 
         if (osmStreetToggle.isOn)
             provider = MapProvider.OpenStreetMap;
         else if (osmStreet2Toggle.isOn)
-            provider = MapProvider.OpenStreetMap2;
+            provider = MapProvider.MapQuest;
         else if (bingStreetToggle.isOn)
             provider = MapProvider.BingMapStreet;
         else
             provider = MapProvider.BingMapAerial;
 
-        var stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
+        if (euroAsiaToggle.isOn)
+            continent = HeightmapContinent.Eurasia;
+        else if (australiaToggle.isOn)
+            continent = HeightmapContinent.Australia;
+        else if (africaToggle.isOn)
+            continent = HeightmapContinent.Africa;
+        else
+            continent = HeightmapContinent.North_America;
+
         scene = new Scene();
         scene.initializeScene(_if.text, continent, provider);
-        stopwatch.Stop();
-        Debug.Log("<color=blue>TOTAL TIME:</color>" + stopwatch.ElapsedMilliseconds);
+
     }
 
     public void ClickLoadProjectRender()
@@ -120,6 +130,7 @@ public class LoadSaveMenu : MonoBehaviour
 
     public void ClickSaveProject()
     {
+        fbd.saveName = scene.sceneName;
         isSaveProject = true;
         DirectoryInfo di = new DirectoryInfo(Directory.GetCurrentDirectory());
         fbd.draw(myFileBrowserDialog.BrowserMode.FolderSelect, di, new string[] { ".xml" });

@@ -19,6 +19,7 @@ public struct Tag
 
 public struct Node
 {
+    public ItemEnumerator.nodeType type;
 	public string id;
     public float lat, lon;
     public float height;
@@ -27,12 +28,13 @@ public struct Node
 
     public Node(Node nd)
     {
+        this.type = nd.type;
         this.id = nd.id;
         this.lat = nd.lat;
         this.lon = nd.lon;
         this.height = nd.height;
         this.meterPosition = nd.meterPosition;
-        this.tags = nd.tags;
+        this.tags = new List<Tag>(nd.tags);
     }
 }
 
@@ -60,7 +62,9 @@ public struct BuildingRelation
 }
 
 public struct Way
-{ 
+{
+    public ItemEnumerator.wayType type;
+
 	public string id;
     //If a way represent an area value is true else false
     public bool isArea;
@@ -71,16 +75,11 @@ public struct Way
 
     public Way(Way w)
     {
+        this.type = w.type;
         this.id = w.id;
         this.isArea = w.isArea;
-        this.tags = new List<Tag>();
-        this.nodes = new List<Node>();
-
-        for(int i = 0 ; i < w.tags.Count ; i++)        
-            this.tags.Add(w.tags[i]);
-        
-        for(int i = 0 ; i < w.nodes.Count; i++)        
-            this.nodes.Add(new Node(w.nodes[i]));
+        this.tags = new List<Tag>(w.tags);
+        this.nodes = new List<Node>(w.nodes);
     }
 };
 
@@ -99,7 +98,7 @@ public struct OSMXml
     public List<Relation> relationList;
 
     public List<BuildingRelation> buildingRelations;
-    public List<Node> treeList;
+    public List<Node> defaultobject3DList;
 }
 
 class OSMparser
@@ -114,7 +113,7 @@ class OSMparser
         osmxml.wayList = new List<Way>();
         osmxml.relationList = new List<Relation>();
         osmxml.buildingRelations = new List<BuildingRelation>();
-        osmxml.treeList = new List<Node>();
+        osmxml.defaultobject3DList = new List<Node>();
 
         nodeList = new List<Node>();
         wayList = new List<Way>();
@@ -138,8 +137,8 @@ class OSMparser
                 Node nd = readNode(node);
                 osmxml.nodeList.Add(nd);
                 nodeList.Add(nd);
-                if (isTree(nd))
-                    osmxml.treeList.Add(nd);
+                if (nd.type != ItemEnumerator.nodeType.None)
+                    osmxml.defaultobject3DList.Add(nd);
             }
             else if (node.Name == "way")
             {
@@ -225,6 +224,8 @@ class OSMparser
            }
        }
 
+       nd.type = ItemEnumerator.getNodeType(nd);
+
        return nd;
     }
 
@@ -250,6 +251,8 @@ class OSMparser
                     w.isArea = true;
             }
         }
+
+        w.type = ItemEnumerator.getWayTpe(w);
 
         return w;
     }
@@ -350,21 +353,6 @@ class OSMparser
         return false;
     }
 
-    private bool isTree(Node nd)
-    {
-        if (nd.tags == null)
-            return false;
-
-        for(int i = 0 ; i < nd.tags.Count ; i++)
-        {
-            if(nd.tags[i].k == "natural" && nd.tags[i].v == "tree")
-                return true;
-        }
-
-        return false;
-
-
-    }
 
 }
 

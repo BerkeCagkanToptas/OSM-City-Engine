@@ -11,7 +11,7 @@ PlayerSettings:
   targetIOSGraphics: -1
   targetResolution: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: Politecnico di Milano
   productName: Polimi OSM City Engine
   cloudProjectId: 
   defaultCursor: {fileID: 0}
@@ -133,13 +133,33 @@ PlayerSettings:
     height: 180
     banner: {fileID: 0}
   androidGamepadSupportLevel: 0
-  resolutionDialogBanner: {fileID: 0}
+  resolutionDialogBanner: {fileID: 2800000, guid: 2f761f785cc569e4c8f7d4efdbafd189,
+    type: 3}
   m_BuildTargetIcons:
   - m_BuildTarget: 
     m_Icons:
-    - m_Icon: {fileID: 0}
+    - m_Icon: {fileID: 2800000, guid: 5515ac039c714c34db79481bbaf79b69, type: 3}
       m_Size: 128
-  m_BuildTargetBatching: []
+  - m_BuildTarget: Standalone
+    m_Icons:
+    - m_Icon: {fileID: 2800000, guid: e516fe5a69ecb864a8745f6f212570d4, type: 3}
+      m_Size: 1024
+    - m_Icon: {fileID: 2800000, guid: 1786ab4adc1410a409cd889b52d8fede, type: 3}
+      m_Size: 512
+    - m_Icon: {fileID: 2800000, guid: 5a13030855784ee40a4b61c0a7ee25b7, type: 3}
+      m_Size: 256
+    - m_Icon: {fileID: 2800000, guid: 5515ac039c714c34db79481bbaf79b69, type: 3}
+      m_Size: 128
+    - m_Icon: {fileID: 0}
+      m_Size: 48
+    - m_Icon: {fileID: 0}
+      m_Size: 32
+    - m_Icon: {fileID: 0}
+      m_Size: 16
+  m_BuildTargetBatching:
+  - m_BuildTarget: Standalone
+    m_StaticBatching: 1
+    m_DynamicBatching: 1
   webPlayerTemplate: APPLICATION:Default
   m_TemplateCustomTags: {}
   actionOnDotNetUnhandledException: 1

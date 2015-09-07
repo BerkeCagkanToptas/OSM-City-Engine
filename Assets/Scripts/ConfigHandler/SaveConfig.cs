@@ -85,12 +85,12 @@ namespace Assets.Scripts.ConfigHandler
         private string savePath;
 
 
-        public SaveConfig(string _savePath,Scene _scene,string _osmPath)
+        public SaveConfig(string _savePath,Scene _scene)
         {
             sceneSave = new SceneSave();
             scene = _scene;
             savePath = _savePath;
-            sceneSave.osmPath = _osmPath;
+            sceneSave.osmPath = _scene.OSMPath;
             sceneSave.continent = _scene.continent;
             sceneSave.provider = _scene.provider;
         }

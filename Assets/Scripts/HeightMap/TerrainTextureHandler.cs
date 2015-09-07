@@ -14,7 +14,7 @@ namespace Assets.Scripts.HeightMap
     {
         BingMapAerial,
         BingMapStreet,
-        OpenStreetMap2,
+        MapQuest,
         OpenStreetMap,
         OpenStreetMapNoLabel
     }
@@ -133,7 +133,7 @@ namespace Assets.Scripts.HeightMap
 
             switch (provider)
             {
-                case MapProvider.OpenStreetMap2:
+                case MapProvider.MapQuest:
                     _URL = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoomLevel.ToString() + "/" + tilex.ToString() + "/" + tiley.ToString() + ".png";
                     
                     savedfileName = savedfileName + ".png";

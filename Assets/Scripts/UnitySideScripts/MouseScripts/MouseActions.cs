@@ -26,10 +26,12 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
         //****************Edit Menus And their Scripts****************
         BuildingEdit buildingEdit;
         HighwayEdit highwayEdit;
+        BarrierEdit barrierEdit;
         ObjectEdit objectEdit;
         CameraVanEdit cameraVanEdit;
         GameObject buildingEditMenu;
         GameObject highwayEditMenu;
+        GameObject barrierEditMenu;
         GameObject ObjectEditMenu;
         GameObject CameraVanEditMenu;
 
@@ -37,8 +39,8 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
 
 
         //************************************************************
-        MeshRenderer previousSelection;
-        MeshRenderer currentSelection;
+        string currentSelectionID, previousSelectionID;
+        GameObject previousSelectionObj, currentSelectionObj;
         //************************************************************
 
 
@@ -46,7 +48,6 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
         private GameObject SelectedGameObject;
         private TransformGizmos SelectedTransformGizmos;
         //************************************************************
-        public bool isFileBrowserOn =false;
 
 
         void Start()
@@ -54,10 +55,12 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
             GameObject canvas = GameObject.Find("Canvas");
             buildingEditMenu = canvas.transform.Find("BuildingEdit").gameObject;
             highwayEditMenu = canvas.transform.Find("HighwayEdit").gameObject;
-            ObjectEditMenu = canvas.transform.Find("3DObjectEdit").gameObject;
+            barrierEditMenu = canvas.transform.Find("BarrierEdit").gameObject;
+            ObjectEditMenu = canvas.transform.Find("3DObjectEdit").gameObject;           
             CameraVanEditMenu = canvas.transform.Find("CameraVanEdit").gameObject;
             buildingEdit = buildingEditMenu.GetComponent<BuildingEdit>();
             highwayEdit = highwayEditMenu.GetComponent<HighwayEdit>();
+            barrierEdit = barrierEditMenu.GetComponent<BarrierEdit>();
             objectEdit = ObjectEditMenu.GetComponent<ObjectEdit>();
             cameraVanEdit = CameraVanEditMenu.GetComponent<CameraVanEdit>();
 
@@ -72,7 +75,10 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
             scaleX = ObjectEditMenu.transform.Find("Panel").Find("TransformPart").Find("InputField_ScaleX").GetComponent<InputField>();
             scaleY = ObjectEditMenu.transform.Find("Panel").Find("TransformPart").Find("InputField_ScaleY").GetComponent<InputField>();
             scaleZ = ObjectEditMenu.transform.Find("Panel").Find("TransformPart").Find("InputField_ScaleZ").GetComponent<InputField>();
- 
+
+            currentSelectionID = "";
+            previousSelectionID = "";
+
         }
 
         void Update()
@@ -97,34 +103,30 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
 
         public void clickAction(objectType type, GameObject gameObj, string ID)
         {
-            if (isFileBrowserOn)
-                return;
-
             if (drawGizmo(type, gameObj))
                 return;
 
-            if (gameObj.tag == "3DObject" || gameObj.tag == "CameraVan" || gameObj.tag == "Terrain")
-                goto PassTilting;
-            //Tilt color of selected Object
-            
-            currentSelection = gameObj.GetComponent<MeshRenderer>();
-            currentSelection.material.color = new Color(0.3f, 0.3f, 1.0f);
+            currentSelectionID = ID;
+            currentSelectionObj = gameObj;
 
-            //Correct Previous select Object Color
-            if (previousSelection != null)
-                previousSelection.material.color = new Color(1, 1, 1);
+            if (gameObj.tag != "3DObject" && gameObj.tag != "CameraVan" && gameObj.tag != "Terrain")
+               currentSelectionObj.GetComponent<MeshRenderer>().material.color = new Color(0.3f, 0.3f, 1.0f);
 
-            if (previousSelection == currentSelection)
+            if (previousSelectionID != "" && previousSelectionObj.tag != "3DObject" && previousSelectionObj.tag != "CameraVan" && previousSelectionObj.tag != "Terrain")
+                previousSelectionObj.GetComponent<MeshRenderer>().material.color = new Color(1, 1, 1);
+
+            if (currentSelectionObj == previousSelectionObj)
             {
                 highwayEditMenu.SetActive(false);
+                barrierEditMenu.SetActive(false);
                 ObjectEditMenu.SetActive(false);
                 buildingEditMenu.SetActive(false);
                 CameraVanEditMenu.SetActive(false);
-                previousSelection = null;
+                previousSelectionObj = null;
+                previousSelectionID = "";
                 return;
             }
 
-            PassTilting:
 
             //fill edit menu
             switch(type)
@@ -133,6 +135,7 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
                     buildingEditMenu.SetActive(true);
                     ObjectEditMenu.SetActive(false);
                     highwayEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(false);
                     CameraVanEditMenu.SetActive(false);
                     int facadeId = int.Parse(gameObj.name.Substring("facade".Length));
                     buildingEdit.fillMenu(ID,facadeId);
@@ -140,11 +143,18 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
                 case objectType.highway :
                     buildingEditMenu.SetActive(false);
                     ObjectEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(false);
                     highwayEditMenu.SetActive(true);
                     CameraVanEditMenu.SetActive(false);
                     highwayEdit.fillMenu(ID);
                     break;
                 case objectType.barrier :
+                    buildingEditMenu.SetActive(false);
+                    ObjectEditMenu.SetActive(false);
+                    highwayEditMenu.SetActive(false);
+                    CameraVanEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(true);
+                    barrierEdit.fillMenu(ID);
                     break;
 
                 case objectType.terrain :
@@ -152,6 +162,7 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
                     ObjectEditMenu.SetActive(false);
                     highwayEditMenu.SetActive(false);
                     CameraVanEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(false);
                     break;
 
                 case objectType.object3d :
@@ -159,24 +170,28 @@ namespace Assets.Scripts.UnitySideScripts.MouseScripts
                     ObjectEditMenu.SetActive(true);
                     highwayEditMenu.SetActive(false);
                     CameraVanEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(false);
                     objectEdit.fillMenu(gameObj);
                     break;
                 case objectType.cameraVan :
                     buildingEditMenu.SetActive(false);
                     ObjectEditMenu.SetActive(false);
                     highwayEditMenu.SetActive(false);
-                    CameraVanEditMenu.SetActive(true);                    
+                    CameraVanEditMenu.SetActive(true);
+                    barrierEditMenu.SetActive(false);
                     break;
                 default :
                     buildingEditMenu.SetActive(false);
                     ObjectEditMenu.SetActive(false);
                     highwayEditMenu.SetActive(false);
                     CameraVanEditMenu.SetActive(false);
+                    barrierEditMenu.SetActive(false);
                     break;
             }
 
             //Update previous selection
-            previousSelection = currentSelection;
+            previousSelectionObj = currentSelectionObj;
+            previousSelectionID = currentSelectionID;
 
         }
 

@@ -19,7 +19,7 @@ namespace Assets.Scripts.UnitySideScripts.Menus
         public Texture2D folderIcon, fileIcon, directoryIcon;
         public BrowserState state;
 
-        public enum BrowserState { Processing, Selected, Cancelled };
+        public enum BrowserState { Processing, Selected, Cancelled, None};
 
         public enum BrowserMode { FileSelect, FolderSelect }
         private string[] acceptedExtensions;
@@ -27,9 +27,11 @@ namespace Assets.Scripts.UnitySideScripts.Menus
 
 
         private InputField IFpath;
+        private InputField IFsaveName;
         private Transform contentPanel;
         private GameObject previousItem;
         private string _path;
+        private string _saveName;
 
         public string selectedPath
         {
@@ -37,10 +39,16 @@ namespace Assets.Scripts.UnitySideScripts.Menus
             set { if(IFpath != null)
                   IFpath.text = shortenString(value); _path = value; }
         }
+        public string saveName
+        {
+            get { return _saveName;  }
+            set { _saveName = value; }
+        }
 
         void Start()
         {
             IFpath = transform.Find("Panel").Find("IFpath").GetComponent<InputField>();
+            IFsaveName = transform.Find("Panel").Find("EnterName").Find("IFfileName").GetComponent<InputField>();
             contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");           
         }
 
@@ -125,11 +133,20 @@ namespace Assets.Scripts.UnitySideScripts.Menus
             currentDirectory = currentDirectory.Parent;
             fillList();
         }
+
+        public void onSaveNameChanged()
+        {
+            saveName = IFsaveName.text;
+        }
         
         public void draw(BrowserMode _mode, DirectoryInfo startingPath,string[] _acceptedExtensions)
         {
             state = BrowserState.Processing;
             gameObject.SetActive(true);
+            if (_mode == BrowserMode.FolderSelect)
+                gameObject.transform.Find("Panel").Find("EnterName").gameObject.SetActive(true);
+            else
+                gameObject.transform.Find("Panel").Find("EnterName").gameObject.SetActive(false);
             mode = _mode;
             currentDirectory = startingPath;
             acceptedExtensions = _acceptedExtensions;

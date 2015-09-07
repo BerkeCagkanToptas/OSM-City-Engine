@@ -175,7 +175,9 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             Vector2 topleft = new Vector2(float.Parse(U_topLeft.text),float.Parse(V_topLeft.text));
             Vector2 topright = new Vector2(float.Parse(U_topRight.text),float.Parse(V_topRight.text));
 
-            building.setTextureCoordinate(facadeID, bottomleft, bottomright, topleft, topright);           
+            building.setTextureCoordinate(facadeID, bottomleft, bottomright, topleft, topright);
+            if (buildingEditSkinMenu == null)
+                buildingEditSkinMenu = GameObject.Find("Canvas").transform.Find("EditBuildingSkin").gameObject;
             buildingEditSkinMenu.SetActive(false);
         }
 

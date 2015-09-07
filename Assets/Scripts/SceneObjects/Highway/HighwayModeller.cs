@@ -263,6 +263,9 @@ namespace Assets.Scripts.SceneObjects
         private void fillIntersectionHole(List<intersectionInfo> intersectionInfos, bool hasTrafficLight, string intersectionID)
         {
             Vector3[] vertices = orderIntersectionVertices(intersectionInfos);
+            if (vertices == null)
+                return;
+
             int[] triangles = new int[(intersections.Count-2)*3];
             Vector3[] normals = new Vector3[intersectionInfos.Count];
             Vector2[] uv = new Vector2[intersectionInfos.Count];
@@ -278,7 +281,7 @@ namespace Assets.Scripts.SceneObjects
 
                 IntersectionNode Node = intersections[intersectionIndex];
                 Node.trafficLights = new List<Object3D>();
-                Node.trafficLights.Add(drawTrafficSign(vertices[UnityEngine.Random.Range(0, vertices.Length)]));
+                Node.trafficLights.Add(DefaultObject3DHandler.drawTrafficSign(vertices[UnityEngine.Random.Range(0, vertices.Length)]));
                 intersections[intersectionIndex] = Node;
             }
 
@@ -391,6 +394,8 @@ namespace Assets.Scripts.SceneObjects
             {
 
                 int index = tmpintersections.FindIndex(item => (item.wayNo2 == nextTofind || item.wayNo1 == nextTofind));
+                if (index == -1)
+                    return null;
                 vertices[count++] = tmpintersections[index].vertice + new Vector3(0.0f,0.2f,0.0f);
 
 
@@ -890,8 +895,8 @@ namespace Assets.Scripts.SceneObjects
 
                 IntersectionNode node = intersections[intersectionIndex];
                 node.trafficLights = new List<Object3D>();
-                node.trafficLights.Add(drawTrafficSign(newVertexLeft));
-                node.trafficLights.Add(drawTrafficSign(newVertexRight));
+                node.trafficLights.Add(DefaultObject3DHandler.drawTrafficSign(newVertexLeft));
+                node.trafficLights.Add(DefaultObject3DHandler.drawTrafficSign(newVertexRight));
                 intersections[intersectionIndex] = node;    
             }
 
@@ -1164,32 +1169,9 @@ namespace Assets.Scripts.SceneObjects
             return wayList.FindIndex(item => item.id == wayID);
         }
 
-        private Object3D drawTrafficSign(Vector3 pos)
-        {
-            Object3D obj = new Object3D();
-            obj.name = "Traffic Light";
-            obj.type = ObjectType.TrafficSign;
-            obj.resourcePath = "Prefabs/TrafficSign/TrafficLight1/TrafficLight1Prefab";
-            obj.object3D = (GameObject)MonoBehaviour.Instantiate(Resources.Load("Prefabs/TrafficSign/TrafficLight1/TrafficLight1Prefab"));
-            obj.object3D.AddComponent<Object3dMouseHandler>();
-            obj.object3D.transform.position = pos + new Vector3(0.2f, 2.0f, -0.2f);
-            obj.object3D.tag = "3DObject";
-            obj.object3D.name = "Traffic Light";
-            return obj;
-        }
         private bool isTrafficLight(Node nd)
         {
-
-            if (nd.tags == null)
-                return false;
-
-            for (int i = 0; i < nd.tags.Count; i++)
-            {
-                if (nd.tags[i].k == "highway" && nd.tags[i].v == "traffic_signals")
-                    return true;
-            }
-            return false;
-
+            return (nd.type == ItemEnumerator.nodeType.TrafficSign);
         }
 
         public void addNewPavement(string pavementID, Pavement.pavementSide side, float size)
@@ -1243,7 +1225,17 @@ namespace Assets.Scripts.SceneObjects
         public void resizeHighway(string highwayID, float newSize)
         {
 
-            int highwayIndex = highwayList.FindIndex(item => item.id == highwayID);           
+            int highwayIndex = highwayList.FindIndex(item => item.id == highwayID);
+
+            for (int i = 0; i < highwayList[highwayIndex].streetLampList.Count;i++)
+            {
+                GameObject.Destroy(highwayList[highwayIndex].streetLampList[i].object3D);
+            }
+
+            highwayList[highwayIndex].streetLampList.Clear();
+
+
+
             highwayList[highwayIndex].waySize = newSize;
             highwayList[highwayIndex].generateInitial3Dway(terrain);
 

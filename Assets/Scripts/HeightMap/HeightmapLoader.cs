@@ -61,12 +61,12 @@ namespace Assets.Scripts.HeightMap
             if(Math.Floor(bbox.bottom) >= 0.0f)
                 filename = filename + "N" + Math.Floor(bbox.bottom).ToString("00");
             else
-                filename = filename + "S" + Math.Floor(bbox.bottom).ToString("00");
+                filename = filename + "S" + Math.Abs(Math.Floor(bbox.bottom)).ToString("00");
 
             if(Math.Floor(bbox.left) >= 0.0f)
                 filename = filename + "E" + Math.Floor(bbox.left).ToString("000");
             else
-                filename = filename + "W" + Math.Floor(bbox.left).ToString("000");
+                filename = filename + "W" + Math.Abs(Math.Floor(bbox.left)).ToString("000");
 
             string savedFilename = filename + ".hgt";
             filename = filename + ".hgt.zip";
@@ -148,6 +148,14 @@ namespace Assets.Scripts.HeightMap
                 }
                 return ms.ToArray();
             }
+        }
+
+        private void getContinent(BBox bbox)
+        {
+            //if(bbox.left > 119.0f && bbox.right < 150.0f && bbox.bottom)
+
+
+
         }
 
     }

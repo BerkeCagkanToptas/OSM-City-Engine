@@ -55,6 +55,7 @@ namespace Assets.Scripts.SceneObjects
         public Material highwayMaterial;
         private Mesh colliderMesh;
 
+        public List<Object3D> streetLampList;
 
         public Highway(Way w, List<HighwayConfigurations> config, myTerrain _terrain)
         {
@@ -66,9 +67,11 @@ namespace Assets.Scripts.SceneObjects
             if (type == highwayType.HighwayFootway)
                 return;
 
+            
             getConfiguration(config);
             bbox = _terrain.scenebbox;
 
+            streetLampList = new List<Object3D>();
             generateInitial3Dway(_terrain);
             //colliderMesh = generateColliderMesh();
 
@@ -271,18 +274,30 @@ namespace Assets.Scripts.SceneObjects
                 right = right.normalized;
 		        Vector3 left = -1 * right;
 
-                
+               
                 //LEFT SIDE
                 Vector2 pointLeft1 = new Vector2(way.nodes[0].meterPosition.x,way.nodes[0].meterPosition.z) + new Vector2(left.x,left.z) * (waySize /2.0f);
                 Vector2 pointLeft2 = new Vector2(way.nodes[1].meterPosition.x,way.nodes[1].meterPosition.z) + new Vector2(left.x,left.z) * (waySize /2.0f);
-                leftSideVertexes.Add(new Vector3(pointLeft1.x,terrain.getTerrainHeight2(pointLeft1.y + bbox.meterBottom, pointLeft1.x + bbox.meterLeft),pointLeft1.y));
-                leftSideVertexes.Add(new Vector3(pointLeft2.x,terrain.getTerrainHeight2(pointLeft2.y + bbox.meterBottom, pointLeft2.x + bbox.meterLeft),pointLeft2.y));
+                Vector3 pointLeft1Pos = new Vector3(pointLeft1.x, terrain.getTerrainHeight2(pointLeft1.y + bbox.meterBottom, pointLeft1.x + bbox.meterLeft), pointLeft1.y);
+                Vector3 pointLeft2Pos = new Vector3(pointLeft2.x, terrain.getTerrainHeight2(pointLeft2.y + bbox.meterBottom, pointLeft2.x + bbox.meterLeft), pointLeft2.y);
+                leftSideVertexes.Add(pointLeft1Pos);
+                leftSideVertexes.Add(pointLeft2Pos);
+                if (way.nodes[0].type == ItemEnumerator.nodeType.StreetLamp)
+                    streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(pointLeft1Pos,way.nodes[0].id));
+                if (way.nodes[1].type == ItemEnumerator.nodeType.StreetLamp)
+                    streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(pointLeft2Pos, way.nodes[1].id));
 
                 //RIGHT SIDE
                 Vector2 pointRight1 = new Vector2(way.nodes[0].meterPosition.x,way.nodes[0].meterPosition.z) + new Vector2(right.x,right.z) * (waySize /2.0f);
                 Vector2 pointRight2 = new Vector2(way.nodes[1].meterPosition.x,way.nodes[1].meterPosition.z) + new Vector2(right.x,right.z) * (waySize /2.0f);
-                rightSideVertexes.Add(new Vector3(pointRight1.x,terrain.getTerrainHeight2(pointRight1.y + bbox.meterBottom, pointRight1.x + bbox.meterLeft),pointRight1.y));
-                rightSideVertexes.Add(new Vector3(pointRight2.x,terrain.getTerrainHeight2(pointRight2.y + bbox.meterBottom, pointRight2.x + bbox.meterLeft),pointRight2.y));
+                Vector3 pointRight1Pos = new Vector3(pointRight1.x, terrain.getTerrainHeight2(pointRight1.y + bbox.meterBottom, pointRight1.x + bbox.meterLeft), pointRight1.y);
+                Vector3 pointRight2Pos = new Vector3(pointRight2.x, terrain.getTerrainHeight2(pointRight2.y + bbox.meterBottom, pointRight2.x + bbox.meterLeft), pointRight2.y);        
+                rightSideVertexes.Add(pointRight1Pos);
+                rightSideVertexes.Add(pointRight2Pos);
+                if (way.nodes[0].type == ItemEnumerator.nodeType.StreetLamp)
+                    streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(pointRight1Pos, way.nodes[0].id));
+                if (way.nodes[1].type == ItemEnumerator.nodeType.StreetLamp)
+                    streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(pointRight2Pos, way.nodes[1].id));
 	        }
 	        else
 	        {
@@ -292,14 +307,12 @@ namespace Assets.Scripts.SceneObjects
                     Vector3 up = new Vector3(0, 1, 0);
 		            Vector3 forward1 = way.nodes[i+1].meterPosition - way.nodes[i].meterPosition;
                             forward1.y = 0.0f;
-		            //Vector3 right1 = Vector3.Cross(forward1 ,up);**************************************************
                     Vector3 right1 = Vector3.Cross(up, forward1);
 		            right1 = right1.normalized;
 		            Vector3 left1 = -1 * right1;
 
                     Vector3 forward2 = way.nodes[i+2].meterPosition - way.nodes[i+1].meterPosition;
                             forward2.y = 0.0f;
-		            //Vector3 right2 = Vector3.Cross(forward2 ,up);**************************************************
                     Vector3 right2 = Vector3.Cross(up, forward2);
 		            right2 = right2.normalized;
 		            Vector3 left2 = -1 * right2;
@@ -308,12 +321,13 @@ namespace Assets.Scripts.SceneObjects
                     if(i == 0)
                     {
                         Vector2 pointLeft1 = new Vector2(way.nodes[i].meterPosition.x, way.nodes[i].meterPosition.z) + new Vector2(left1.x, left1.z) * (waySize / 2.0f);
-                        leftSideVertexes.Add(new Vector3(pointLeft1.x, terrain.getTerrainHeight2(pointLeft1.y + bbox.meterBottom, pointLeft1.x + bbox.meterLeft), pointLeft1.y));
+                        Vector3 pointLeft1Pos = new Vector3(pointLeft1.x, terrain.getTerrainHeight2(pointLeft1.y + bbox.meterBottom, pointLeft1.x + bbox.meterLeft), pointLeft1.y);
+                        leftSideVertexes.Add(pointLeft1Pos);
 
                         Vector2 pointRight1 = new Vector2(way.nodes[i].meterPosition.x, way.nodes[i].meterPosition.z) + new Vector2(right1.x, right1.z) * (waySize / 2.0f);
-                        rightSideVertexes.Add(new Vector3(pointRight1.x, terrain.getTerrainHeight2(pointRight1.y + bbox.meterBottom, pointRight1.x + bbox.meterLeft), pointRight1.y));
+                        Vector3 pointRight1Pos = new Vector3(pointRight1.x, terrain.getTerrainHeight2(pointRight1.y + bbox.meterBottom, pointRight1.x + bbox.meterLeft), pointRight1.y); 
+                        rightSideVertexes.Add(pointRight1Pos);
                 
-
                     }
 
                     //1ST LINE LEFT
@@ -326,11 +340,15 @@ namespace Assets.Scripts.SceneObjects
 
                     //INTERSECTION LEFT
                     Vector2 iL = new Vector2();
+                    Vector3 iLPos;
                     if(!Geometry.getInfiniteLineIntersection(ref iL,p0,p1,p2,p3))
-                        leftSideVertexes.Add(new Vector3(p1.x, terrain.getTerrainHeight2(p1.y + bbox.meterBottom,p1.x + bbox.meterLeft) ,p1.y));
+                        iLPos = new Vector3(p1.x, terrain.getTerrainHeight2(p1.y + bbox.meterBottom,p1.x + bbox.meterLeft) ,p1.y);
                     else
-                        leftSideVertexes.Add(new Vector3(iL.x, terrain.getTerrainHeight2(iL.y + bbox.meterBottom, iL.x + bbox.meterLeft), iL.y));
+                       iLPos = new Vector3(iL.x, terrain.getTerrainHeight2(iL.y + bbox.meterBottom, iL.x + bbox.meterLeft), iL.y);
 
+                    leftSideVertexes.Add(iLPos);
+                    if (way.nodes[i + 1].type == ItemEnumerator.nodeType.StreetLamp)
+                        streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(iLPos, way.nodes[i + 1].id));
 
                     //1ST LINE RIGHT
                      p0 = new Vector2(way.nodes[i].meterPosition.x, way.nodes[i].meterPosition.z) + new Vector2(right1.x, right1.z) * (waySize / 2.0f);
@@ -343,11 +361,15 @@ namespace Assets.Scripts.SceneObjects
 
                     //INTERSECTION RIGHT
                      Vector2 iR = new Vector2();
+                     Vector3 iRPos;
                     if (!Geometry.getInfiniteLineIntersection(ref iR, p0, p1, p2, p3))
-                        rightSideVertexes.Add(new Vector3(p1.x, terrain.getTerrainHeight2(p1.y + bbox.meterBottom, p1.x + bbox.meterLeft), p1.y));
+                        iRPos = new Vector3(p1.x, terrain.getTerrainHeight2(p1.y + bbox.meterBottom, p1.x + bbox.meterLeft), p1.y);
                     else
-                        rightSideVertexes.Add(new Vector3(iR.x, terrain.getTerrainHeight2(iR.y + bbox.meterBottom, iR.x + bbox.meterLeft), iR.y));
-            
+                        iRPos = new Vector3(iR.x, terrain.getTerrainHeight2(iR.y + bbox.meterBottom, iR.x + bbox.meterLeft), iR.y);
+
+                    rightSideVertexes.Add(iRPos);
+                    if (way.nodes[i + 1].type == ItemEnumerator.nodeType.StreetLamp)
+                        streetLampList.Add(DefaultObject3DHandler.drawStreetLamp(iRPos, way.nodes[i + 1].id));
 
 			        //ENDING POINTS ARE ADDEDD TO NODES3D
 			        if (i == way.nodes.Count - 3)

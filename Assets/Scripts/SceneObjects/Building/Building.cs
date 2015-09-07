@@ -180,6 +180,7 @@ namespace Assets.Scripts.SceneObjects
                                      new Vector3(node1.meterPosition.x,equalizedBuildingHeight,node1.meterPosition.z)
                                  };
 
+
             int[] triangles;
 
             if (!isClockwise)
@@ -203,8 +204,9 @@ namespace Assets.Scripts.SceneObjects
                 aa = 1.0f;
             }
 
+
             Vector2[] UVcoords = new Vector2[4];
-            if(isClockwise)
+            if (isClockwise)
             {
                 UVcoords[0] = new Vector2(0, (vertices[0].y - bb) / buildingHeight);
                 UVcoords[1] = new Vector2(aa, (vertices[1].y - bb) / buildingHeight);
@@ -213,11 +215,12 @@ namespace Assets.Scripts.SceneObjects
             }
             else
             {
-                UVcoords[0] = new Vector2(aa, (vertices[0].y - bb)/buildingHeight);
+                UVcoords[0] = new Vector2(aa, (vertices[0].y - bb) / buildingHeight);
                 UVcoords[1] = new Vector2(0, (vertices[1].y - bb) / buildingHeight);
                 UVcoords[2] = new Vector2(0, 1);
                 UVcoords[3] = new Vector2(aa, 1);
             }
+
       
             Geometry geo = new Geometry();
             Vector3 facadeNormal;
@@ -244,7 +247,11 @@ namespace Assets.Scripts.SceneObjects
             meshFilter.mesh = mesh;
 
             MeshRenderer meshRenderer = facade.GetComponent<MeshRenderer>();
-            meshRenderer.material = defaultMaterial;
+            int skinIndex = facadeSkins.FindIndex(o=>o.facadeID == facadeID);
+            if (skinIndex == -1)
+                meshRenderer.material = defaultMaterial;
+            else
+                meshRenderer.material = InGameTextureHandler.createMaterial(facadeSkins[skinIndex]);
 
             MeshCollider meshCollider = facade.GetComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
@@ -264,7 +271,7 @@ namespace Assets.Scripts.SceneObjects
             Triangulator tr = new Triangulator(vertices2D);
             int[] indices = tr.Triangulate();
 
-            // Create the Vector3 vertices
+            //Create the Vector3 vertices
             Vector3[] vertices = new Vector3[vertices2D.Length];
             for (int i = 0; i < vertices.Length; i++)
                 vertices[i] = new Vector3(vertices2D[i].x,equalizedBuildingHeight,vertices2D[i].y);
@@ -309,7 +316,8 @@ namespace Assets.Scripts.SceneObjects
             {
                 if (tagList[i].k == "building:level")
                     _buildingHeight = float.Parse(tagList[i].v) * 3.0f;
-
+                else if (tagList[i].k == "building:height")
+                    _buildingHeight = float.Parse(tagList[i].v);
                 else if (tagList[i].k == "man_made" && tagList[i].v == "tower")
                     _buildingHeight = 25.0f;
 

@@ -12,7 +12,7 @@ namespace Assets.Scripts.UnitySideScripts
         public WheelCollider[] wheelColliders = new WheelCollider[4];
         public Transform[] wheelTransforms = new Transform[4];
         public Transform centerOfMass = null;
-        public float maxTorque = 100.0f;
+        public float enginePower = 100.0f;
 
         private Rigidbody rigidBody;
 
@@ -41,10 +41,10 @@ namespace Assets.Scripts.UnitySideScripts
         void FixedUpdate()
         {
             float steer = Input.GetAxis("Horizontal");
-            float accelerate = Input.GetAxis("Vertical");
+            float power = Input.GetAxis("Vertical") * enginePower * Time.deltaTime * 200.0f;
 
             for (int i = 0; i < 4; i++)
-                wheelColliders[i].motorTorque = maxTorque * accelerate;
+                wheelColliders[i].motorTorque = power;
 
             wheelColliders[0].steerAngle = 45 * steer;
             wheelColliders[1].steerAngle = 45 * steer;

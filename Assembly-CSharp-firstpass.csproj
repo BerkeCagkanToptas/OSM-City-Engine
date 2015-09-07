@@ -60,14 +60,14 @@
      <Compile Include="Assets\Standard Assets\CrossPlatformInput\Scripts\TiltInput.cs" />
      <Compile Include="Assets\Standard Assets\CrossPlatformInput\Scripts\TouchPad.cs" />
      <Compile Include="Assets\Standard Assets\CrossPlatformInput\Scripts\VirtualInput.cs" />
-     <None Include="Assets\Resources\FileBrowser\readme.txt" />
-     <None Include="Assets\GizmoControls\Resources\UI-Unlit-Detail.shader" />
+     <None Include="Assets\Resources\GizmoControls\Resources\UI-Unlit-Detail.shader" />
      <None Include="Assets\Resources\OSMFiles\comoGeneral.xml" />
-     <None Include="Assets\GizmoControls\Resources\UI-Lit-Transparent.shader" />
+     <None Include="Assets\Resources\GizmoControls\Resources\UI-Lit-Transparent.shader" />
      <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
      <None Include="Assets\Resources\OSMFiles\Pannilani.xml" />
      <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />
      <None Include="Assets\Resources\OSMFiles\Brunate.xml" />
+     <None Include="Assets\Resources\OSMFiles\ControllerLog.xml" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -91,6 +91,9 @@
  </Reference>
  <Reference Include="Ionic.Zip">
  <HintPath>C:/Users/user/Documents/Unity3D Workspace/Polimi OSM City Engine/Assets/Plugins/Ionic.Zip.dll</HintPath>
+ </Reference>
+ <Reference Include="ObjReader">
+ <HintPath>C:/Users/user/Documents/Unity3D Workspace/Polimi OSM City Engine/Assets/Plugins/ObjReader.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
  <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/iossupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>

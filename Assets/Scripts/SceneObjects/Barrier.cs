@@ -5,10 +5,12 @@ using System.Text;
 using Assets.Scripts.ConfigHandler;
 using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
+using Assets.Scripts.UnitySideScripts.MouseScripts;
+using Assets.Scripts.Utils;
 
 namespace Assets.Scripts.SceneObjects
 {
-    enum BarrierType
+    public enum BarrierType
     {
         fence,
         wall,
@@ -22,23 +24,34 @@ namespace Assets.Scripts.SceneObjects
 
     public class Barrier
     {
-        BarrierConfigurations barrierConfig;
-        BarrierType type;
-        GameObject BarrierContainer;
-        List<GameObject> BarrierElements;
+        public string id;
+        public BarrierType type;
+        public GameObject BarrierContainer;
 
+        BarrierConfigurations barrierConfig;  
+        List<GameObject> BarrierElements;
+        Way barrierWay;
+
+        public float height;
+        public float thickness;
+        public string texturePath;
+        public Material barrierMaterial;
 
 
         public Barrier(Way w, List<BarrierConfigurations> config)
         {
+            id = w.id;
             type = getBarrierType(w.tags);
-            barrierConfig = getBarrierConfiguration(config,type); 
-            
+            barrierConfig = getBarrierConfiguration(config,type);
 
-            BarrierContainer = new GameObject(type.ToString("G") + "_" + w.id);
+            height = barrierConfig.height;
+            thickness = barrierConfig.width;
+            barrierMaterial = (Material)Resources.Load(barrierConfig.Path);
+
+            BarrierContainer = new GameObject("Barrier" + w.id);
             BarrierContainer.transform.position = new Vector3(0, 0, 0);
-            BarrierElements = new List<GameObject>(); 
-
+            BarrierElements = new List<GameObject>();
+            barrierWay = w;
             generateBarrier(w);
       
         }
@@ -88,7 +101,6 @@ namespace Assets.Scripts.SceneObjects
 
         private void generateFence(Way way)
         {
-            float height = 2.0f;
 
             for (int i = 0; i < way.nodes.Count-1; i++)
             {
@@ -106,7 +118,8 @@ namespace Assets.Scripts.SceneObjects
                 }
 
 
-                GameObject fencePlane = new GameObject("FencePlane", typeof(MeshFilter), typeof(MeshRenderer));
+                GameObject fencePlane = new GameObject("Plane", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+                fencePlane.AddComponent<BarrierMouseHandler>();
                 fencePlane.transform.parent = BarrierContainer.transform;
 
                 Vector3[] vertices = new Vector3[] { way.nodes[i].meterPosition,
@@ -125,8 +138,11 @@ namespace Assets.Scripts.SceneObjects
                 MeshFilter meshFilter = fencePlane.GetComponent<MeshFilter>();
                 meshFilter.mesh = mesh;
 
+                MeshCollider meshCollider = fencePlane.GetComponent<MeshCollider>();
+                meshCollider.sharedMesh = mesh;
+
                 MeshRenderer meshRenderer = fencePlane.GetComponent<MeshRenderer>();
-                meshRenderer.material = (Material)Resources.Load(barrierConfig.Path);
+                meshRenderer.material = barrierMaterial;
                 BarrierElements.Add(fencePlane);
             }            
 
@@ -143,16 +159,12 @@ namespace Assets.Scripts.SceneObjects
 
         private void generateWall(Way way)
         {
-
-            float height = barrierConfig.height;
-            float width = barrierConfig.width;
-
             for (int i = 0; i < way.nodes.Count-1; i++)
             {
 
-                GameObject Wall = new GameObject("Wall_" + way.id, typeof(MeshFilter), typeof(MeshRenderer));
+                GameObject Wall = new GameObject("WallBlock", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
                 Wall.transform.parent = BarrierContainer.transform;
-
+                Wall.AddComponent<BarrierMouseHandler>();
                 Vector3 up = new Vector3(0, 1, 0);
                 Vector3 forward = way.nodes[i+1].meterPosition - way.nodes[i].meterPosition;
                 forward.y = 0.0f;
@@ -160,30 +172,30 @@ namespace Assets.Scripts.SceneObjects
                 right = right.normalized;
                 Vector3 left = -1.0f * right;
 
-                Vector3[] vertices = new Vector3[] { way.nodes[i].meterPosition   + left * width/2.0f,
-                                                     way.nodes[i+1].meterPosition + left * width/2.0f,
-                                                     way.nodes[i+1].meterPosition + new Vector3(0.0f, height, 0.0f) + left * width/2.0f,
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * width/2.0f,
+                Vector3[] vertices = new Vector3[] { way.nodes[i].meterPosition   + left * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition + left * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition + new Vector3(0.0f, height, 0.0f) + left * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * thickness/2.0f,
 
-                                                     way.nodes[i].meterPosition   + right * width/2.0f,
-                                                     way.nodes[i+1].meterPosition + right * width/2.0f,
-                                                     way.nodes[i+1].meterPosition + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
+                                                     way.nodes[i].meterPosition   + right * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition + right * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
 
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * width/2.0f,
-                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * width/2.0f,
-                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + left * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
 
-                                                     way.nodes[i].meterPosition   + left  * width/2.0f,
-                                                     way.nodes[i].meterPosition   + right * width/2.0f,
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
-                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left  * width/2.0f,
+                                                     way.nodes[i].meterPosition   + left  * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + right * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
+                                                     way.nodes[i].meterPosition   + new Vector3(0.0f, height, 0.0f) + left  * thickness/2.0f,
 
-                                                     way.nodes[i+1].meterPosition   + left  * width/2.0f,
-                                                     way.nodes[i+1].meterPosition   + right * width/2.0f,
-                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * width/2.0f,
-                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + left  * width/2.0f,
+                                                     way.nodes[i+1].meterPosition   + left  * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition   + right * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + right * thickness/2.0f,
+                                                     way.nodes[i+1].meterPosition   + new Vector3(0.0f, height, 0.0f) + left  * thickness/2.0f,
 
                                                    };
 
@@ -210,8 +222,11 @@ namespace Assets.Scripts.SceneObjects
                 MeshFilter meshFilter = Wall.GetComponent<MeshFilter>();
                 meshFilter.mesh = mesh;
 
+                MeshCollider meshCollider = Wall.GetComponent<MeshCollider>();
+                meshCollider.sharedMesh = mesh;
+
                 MeshRenderer meshRenderer = Wall.GetComponent<MeshRenderer>();
-                meshRenderer.material = (Material)Resources.Load(barrierConfig.Path);
+                meshRenderer.material = barrierMaterial;
                 BarrierElements.Add(Wall);
             }           
 
@@ -220,6 +235,8 @@ namespace Assets.Scripts.SceneObjects
 
         private void generateBarrier(Way way)
         {
+           
+
             switch (type)
             {
                 case BarrierType.fence:
@@ -234,6 +251,150 @@ namespace Assets.Scripts.SceneObjects
                     generateWall(way);
                     break;
             }
+        }
+
+        public void updateHeight(float newHeight)
+        {
+            height = newHeight;
+
+            if (type == BarrierType.fence)
+            {
+                var parentTransform = BarrierContainer.transform;
+                foreach (Transform child in parentTransform)
+                {
+                    if (child.name == "FencePole")
+                    {
+
+
+                    }
+                    else
+                    {
+                        int itr = 0;
+                        MeshFilter meshfilter = child.GetComponent<MeshFilter>();
+                        meshfilter.mesh.vertices = getVertices(newHeight, thickness, itr);
+                    }
+                }
+            }
+
+            else
+            {
+                int itr = 0;
+                var parentTransform = BarrierContainer.transform;
+                foreach(Transform child in parentTransform)
+                {
+                    MeshFilter meshfilter = child.GetComponent<MeshFilter>();
+                    meshfilter.mesh.vertices = getVertices(newHeight, thickness, itr);
+                    itr++;
+                }
+
+            }
+
+
+        }
+
+        public void updateThickness(float newThickness)
+        {
+            thickness = newThickness;
+
+            if (type == BarrierType.fence)
+                return;
+            else
+            {
+                int itr = 0;
+                var parentTransform = BarrierContainer.transform;
+                foreach (Transform child in parentTransform)
+                {
+                    MeshFilter meshfilter = child.GetComponent<MeshFilter>();
+                    meshfilter.mesh.vertices = getVertices(height, newThickness, itr);
+                    itr++;
+                }
+            }
+
+        }
+
+        public void updateTexture(string texPath)
+        {
+            texturePath = texPath;
+            barrierMaterial = InGameTextureHandler.createMaterial(texPath, "", "");
+
+            if(type == BarrierType.fence)
+            {
+                var parentTransform = BarrierContainer.transform;
+                foreach (Transform child in parentTransform)
+                {
+                    if (child.name != "FencePole")
+                    {
+                        MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+                        renderer.material = barrierMaterial;
+                    }
+                }
+            }
+            else
+            {
+                var parentTransform = BarrierContainer.transform;
+                foreach (Transform child in parentTransform)
+                {
+                        MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+                        renderer.material = barrierMaterial;              
+                }
+            }
+
+
+        }
+
+        private Vector3[] getVertices(float _height, float _thickness, int itr)
+        {
+            if(type == BarrierType.fence)
+            {
+                return new Vector3[] { barrierWay.nodes[itr].meterPosition,
+                                                     barrierWay.nodes[itr+1].meterPosition,
+                                                     barrierWay.nodes[itr+1].meterPosition + new Vector3(0.0f,_height,0.0f),
+                                                     barrierWay.nodes[itr].meterPosition + new Vector3(0.0f, _height, 0.0f)};
+            }
+
+            else
+            {
+
+                Vector3 up = new Vector3(0, 1, 0);
+                Vector3 forward = barrierWay.nodes[itr + 1].meterPosition - barrierWay.nodes[itr].meterPosition;
+                forward.y = 0.0f;
+                Vector3 right = Vector3.Cross(forward, up);
+                right = right.normalized;
+                Vector3 left = -1.0f * right;
+
+                return new Vector3[] { barrierWay.nodes[itr].meterPosition   + left * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition + left * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition + new Vector3(0.0f, _height, 0.0f) + left * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + left * _thickness/2.0f,
+
+                                                     barrierWay.nodes[itr].meterPosition   + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + left * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition   + new Vector3(0.0f, _height, 0.0f) + left * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition   + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+
+                                                     barrierWay.nodes[itr].meterPosition   + left  * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr].meterPosition   + new Vector3(0.0f, _height, 0.0f) + left  * _thickness/2.0f,
+
+                                                     barrierWay.nodes[itr+1].meterPosition   + left  * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition   + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition   + new Vector3(0.0f, _height, 0.0f) + right * _thickness/2.0f,
+                                                     barrierWay.nodes[itr+1].meterPosition   + new Vector3(0.0f, _height, 0.0f) + left  * _thickness/2.0f,
+
+                                                   };
+
+
+
+
+            }
+
+
         }
 
     }

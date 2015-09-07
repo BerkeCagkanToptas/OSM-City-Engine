@@ -59,14 +59,17 @@
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>Library\UnityAssemblies\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip">
-      <HintPath>Assets\Plugins\Ionic.Zip.dll</HintPath>
+    <Reference Include="I18N.CJK">
+      <HintPath>Assets\Plugins\I18N.CJK.dll</HintPath>
+    </Reference>
+    <Reference Include="I18N">
+      <HintPath>Assets\Plugins\I18N.dll</HintPath>
+    </Reference>
+    <Reference Include="I18N.MidEast">
+      <HintPath>Assets\Plugins\I18N.MidEast.dll</HintPath>
     </Reference>
     <Reference Include="I18N.Other">
       <HintPath>Assets\Plugins\I18N.Other.dll</HintPath>
-    </Reference>
-    <Reference Include="I18N.CJK">
-      <HintPath>Assets\Plugins\I18N.CJK.dll</HintPath>
     </Reference>
     <Reference Include="I18N.Rare">
       <HintPath>Assets\Plugins\I18N.Rare.dll</HintPath>
@@ -74,34 +77,76 @@
     <Reference Include="I18N.West">
       <HintPath>Assets\Plugins\I18N.West.dll</HintPath>
     </Reference>
-    <Reference Include="I18N.MidEast">
-      <HintPath>Assets\Plugins\I18N.MidEast.dll</HintPath>
+    <Reference Include="Ionic.Zip">
+      <HintPath>Assets\Plugins\Ionic.Zip.dll</HintPath>
     </Reference>
-    <Reference Include="I18N">
-      <HintPath>Assets\Plugins\I18N.dll</HintPath>
+    <Reference Include="ObjReader">
+      <HintPath>Assets\Plugins\ObjReader.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="UnityVS.Polimi OSM City Engine.CSharp.Plugins.csproj">
+      <Project>{2541D22F-A94F-65A1-F4D9-29DFCC7BDCC9}</Project>
+      <Name>UnityVS.Polimi OSM City Engine.CSharp.Plugins</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\Resources\GizmoControls\Scripts\DynamicTransformGizmos.cs" />
+    <Compile Include="Assets\Resources\GizmoControls\Scripts\GizmoSelection.cs" />
+    <Compile Include="Assets\Resources\GizmoControls\Scripts\TransformGizmos.cs" />
     <Compile Include="Assets\Scripts\ConfigHandler\InitialConfigLoader.cs" />
     <Compile Include="Assets\Scripts\ConfigHandler\LoadConfig.cs" />
     <Compile Include="Assets\Scripts\ConfigHandler\SaveConfig.cs" />
     <Compile Include="Assets\Scripts\HeightMap\Geography.cs" />
-    <Compile Include="Assets\Scripts\HeightMap\HeighmapLoader.cs" />
+    <Compile Include="Assets\Scripts\HeightMap\HeightmapLoader.cs" />
     <Compile Include="Assets\Scripts\HeightMap\TerrainTextureHandler.cs" />
+    <Compile Include="Assets\Scripts\OpenStreetMap\ItemEnumerator.cs" />
     <Compile Include="Assets\Scripts\OpenStreetMap\OSMparser.cs" />
-    <Compile Include="Assets\Scripts\SceneObjects\Area.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Barrier.cs" />
-    <Compile Include="Assets\Scripts\SceneObjects\Building.cs" />
-    <Compile Include="Assets\Scripts\SceneObjects\Highway.cs" />
-    <Compile Include="Assets\Scripts\SceneObjects\SceneOptimizer.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Building\Building.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Building\BuildingListModeller.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\DrapeHighway.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\Highway.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\HighwayListModeller.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\HighwayModeller.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\Pavement.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Object3D\DefaultObject3DHandler.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Object3D\Object3D.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Scene.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\myTerrain.cs" />
-    <Compile Include="Assets\Scripts\UnitySideScripts\FreeFlyCamera.cs" />
-    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\FileBrowser.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\ControllerScripts\ControllerCam.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\CarController.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\ControllerScripts\ControllerLaserScanner.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\BarrierEdit.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\BuildingEdit.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\CameraVanEdit.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\HighwayEdit.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\ObjectEdit.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\AddObjectMenu\ObjectList.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\AddObjectMenu\ObjectTypeSelector.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\CameraVanCameraSettings.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\CameraVanLaserSettings.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\DefaultSettingsMenu\DefaultBarrierSettings.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\DefaultSettingsMenu\DefaultBuildingSettings.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\DefaultSettingsMenu\DefaultHighwaySettings.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\DefaultSettingsMenu\DefaultSkyboxSettings.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\LoadSaveMenu.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\myFileBrowserDialog.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\BarrierMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\BuildingMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\CameraVanMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\HighwayMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\MouseActions.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\Object3dMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\TerrainMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\MouseScripts\pinPointMouseHandler.cs" />
+    <Compile Include="Assets\Scripts\Utils\FPS.cs" />
     <Compile Include="Assets\Scripts\Utils\FileDownloader.cs" />
     <Compile Include="Assets\Scripts\Utils\Geometry.cs" />
+    <Compile Include="Assets\Scripts\Utils\InGameTextureHandler.cs" />
+    <Compile Include="Assets\Scripts\Utils\LoadExternalOBJ.cs" />
     <Compile Include="Assets\Scripts\Utils\Triangulator.cs" />
     <Compile Include="Assets\Scripts\Utils\UniZip.cs" />
     <Compile Include="Assets\Scripts\Utils\WebDownload.cs">
@@ -109,10 +154,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Resources\FileBrowser\readme.txt" />
+    <None Include="Assets\Resources\GizmoControls\Resources\UI-Lit-Transparent.shader" />
+    <None Include="Assets\Resources\GizmoControls\Resources\UI-Unlit-Detail.shader" />
     <None Include="Assets\Resources\OSMFiles\Brunate.xml" />
+    <None Include="Assets\Resources\OSMFiles\ControllerLog.xml" />
     <None Include="Assets\Resources\OSMFiles\Pannilani.xml" />
     <None Include="Assets\Resources\OSMFiles\comoGeneral.xml" />
+    <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />
+    <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

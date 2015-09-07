@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.SceneObjects;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,18 @@ namespace Assets.Scripts.Utils
 {
     class InGameTextureHandler
     {
+        public static Texture2D getTexture(string path)
+        {
+            if (path == "")
+                return null;
+
+            byte[] fileData;
+            Texture2D tex = new Texture2D(2, 2);
+            fileData = File.ReadAllBytes(path);
+            tex.LoadImage(fileData);           
+            return tex;
+        }
+
         public static Texture2D getNormalTexture(string filePath)
         {
             byte[] fileData;
@@ -46,7 +59,6 @@ namespace Assets.Scripts.Utils
             normalTexture.Apply();
             return normalTexture;
                 }
-
 
         public static Material createMaterial(string colorTexturePath, string normalTexturePath, string specularTexturePath)
         {
@@ -87,5 +99,23 @@ namespace Assets.Scripts.Utils
             return mat;
 
         }
+
+        public static Material createMaterial(FacadeSkin skin)
+        {
+            Material mat = new Material(Shader.Find("Standard (Specular setup)"));
+
+            Texture2D colortex = getTexture(skin.colorTexturePath);
+            Texture2D normaltex = getTexture(skin.normalTexturePath);
+            Texture2D speculartex = getTexture(skin.specularTexturePath);
+
+            mat.SetTexture("_MainTex", colortex);
+            mat.SetTexture("_BumpMap", normaltex);
+            mat.SetFloat("_BumpScale", 1.0f);
+            mat.SetFloat("_Glossiness", 0.1f);
+            mat.SetTexture("_SpecGlossMap", speculartex);
+
+            return mat;
+        }
+    
     }
 }

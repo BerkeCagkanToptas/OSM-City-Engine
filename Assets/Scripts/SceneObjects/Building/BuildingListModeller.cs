@@ -44,7 +44,7 @@ namespace Assets.Scripts.SceneObjects
 
         }
 
-        public BuildingListModeller(List<Way> buildingWay, List<BuildingRelation> buildingRelation, BuildingConfigurations config, List<HighwaySave> highwaySave)
+        public BuildingListModeller(List<Way> buildingWay, List<BuildingRelation> buildingRelation, BuildingConfigurations config, List<BuildingSave> buildingSave)
         {
             setMaterialList(config);
 
@@ -52,26 +52,32 @@ namespace Assets.Scripts.SceneObjects
 
             for (int i = 0; i < buildingRelation.Count; i++)
             {
+                int saveIndex = buildingSave.FindIndex(item=> item.buildingID == buildingRelation[i].id);
+                if (saveIndex == -1)
+                    continue;
                 float materialtexWidth = 10;
-                int materialID = -1;
-                Material mat = getMaterial(buildingRelation[i].tags, config, ref materialtexWidth, ref materialID);
+                int materialID = buildingSave[saveIndex].materialID;
+                Material mat = getMaterial(materialID,config,ref materialtexWidth);
                 buildingList.Add(new Building(buildingRelation[i], config, mat, materialID, materialtexWidth));
-
+                buildingList[buildingList.Count-1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);      
             }
+
             for (int i = 0; i < buildingWay.Count; i++)
             {
                 if (!buildingList.Exists(item => item.id == buildingWay[i].id))
                 {
+                    int saveIndex = buildingSave.FindIndex(item => item.buildingID == buildingWay[i].id);
+                    if (saveIndex == -1)
+                        continue;
                     float materialtexWidth = 10;
-                    int materialID = -1;
-                    Material mat = getMaterial(buildingWay[i].tags, config, ref materialtexWidth, ref materialID);
+                    int materialID = buildingSave[saveIndex].materialID;
+                    Material mat = getMaterial(materialID, config, ref materialtexWidth);
                     buildingList.Add(new Building(buildingWay[i], config, mat, materialID, materialtexWidth));
+                    buildingList[buildingList.Count - 1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);
                 }
-
             }
 
         }
-
 
         public void renderBuildingList()
         {
@@ -116,6 +122,11 @@ namespace Assets.Scripts.SceneObjects
             return materialList[skinindex];
         }
 
+        private Material getMaterial(int materialID, BuildingConfigurations config, ref float matWidth)
+        {
+            matWidth = config.defaultSkins[materialID].width;
+            return materialList[materialID];
+        }
 
         private  void setMaterialList(BuildingConfigurations buildingConfig)
         {
