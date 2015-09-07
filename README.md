@@ -8,7 +8,7 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 1. 3D Building Rendering from 2D OSM data
 
-2.  Edit Building settings, (Change Textures, Height, Position)
+2.  Editing Building settings, (Change Textures, Height, Position)
 
 3. [In Development] Replace building with a 3D Model (with Translate, Scale and Rotate Options)
 
@@ -16,9 +16,9 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 1. 3D Highway and Railway rendering from 2D OSM data
 
-2. Add Sidewalk to both side desired
+2. Adding sidewalks to both side desired
 
-3. [In Development] Edit Highway Settings (Change highway width, Texture, Enable/Disable sidewalk)
+3. Edit Highway Settings (Change highway width, Texture, Enable/Disable sidewalk)
 
 **Terrain :**
 
@@ -26,11 +26,11 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 2. Automatic heightmap download from Nasa SRTM3
 
-3. Select Terrain texture from different Tile providers(OpenStreetMap, BingMap)
+3. Selecting Terrain texture from different Tile providers(e.g. OpenStreetMap, BingMap)
 
 **3D Objects :**
 
-1. Trees and Traffic Lights placed automatically from OSM data
+1. Various objects (e.g. Trees,Traffic Light, Street Lamp) supported by OSM data auto-generation
 
 2. Add new objects (Car, Tree, TrafficSign or any desired model)
 
@@ -40,13 +40,13 @@ Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [Openstr
 
 1. Load/Save Project Option
 
-2. [In Development] Change Skybox, Sun's Orientation
+2. Changing Skybox, Sun's Orientation
 
 **Incoming Features :**
 
-1. Capture video from car Camera
+1. Capture video frames from car Camera
 
-2. Laser Scanner to generate Depth Data
+2. Laser Scanner to generate Point Cloud Data
 
 ## ScreenShots ##
 
