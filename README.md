@@ -2,7 +2,8 @@
 
 Polimi OSM City Engine is a 3D tool that renders cities in 3D. It takes [OpenstreetMap XML](http://wiki.openstreetmap.org/wiki/OSM_XML) file as input and automatically construct 3D City from 2D raw data. For terrain rendering, it takes Nasa SRTM3 Data as heightmap and Openstreet/Bingmap tile images as texture. In addition to auto construction, user can add/edit objects in the scene by using edit menu.
 
-[Click to watch my Video Demonstration!](https://www.youtube.com/watch?v=5lzqbklKcSQ)
+
+[**Click here to watch my Video Demonstration!**](https://www.youtube.com/watch?v=U1wtIR3DJBY!)
 
 ## What is included: ##
 
