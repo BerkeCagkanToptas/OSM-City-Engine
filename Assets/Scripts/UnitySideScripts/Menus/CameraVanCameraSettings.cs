@@ -12,15 +12,6 @@ namespace Assets.Scripts.UnitySideScripts.Menus
     {
         int cameraidIterate = 2;
 
-        public struct CameraSettingItem
-        {
-            public string id;
-            public float yaw, pitch, roll;
-            public Vector3 position;
-            public float fieldOfView;
-            public int frameRate;
-        }
-
         public void clickAddCamera()
         {
             Transform contentPanel = this.transform.Find("Panel").Find("Scroll Rect").Find("Content Panel");
@@ -33,11 +24,11 @@ namespace Assets.Scripts.UnitySideScripts.Menus
         public void clickSaveChanges()
         {
             Transform contentPanel = this.transform.Find("Panel").Find("Scroll Rect").Find("Content Panel");
-            List<CameraSettingItem> cameraList = new List<CameraSettingItem>();
+            List<CameraSetting> cameraList = new List<CameraSetting>();
 
             foreach(Transform cameraSetting in contentPanel)
             {
-                CameraSettingItem item = new CameraSettingItem();
+                CameraSetting item = new CameraSetting();
                 Transform panel = cameraSetting.Find("Panel");
                 if (panel.Find("ToggleIsActive").GetComponent<Toggle>().isOn)
                 {
@@ -63,6 +54,35 @@ namespace Assets.Scripts.UnitySideScripts.Menus
             this.gameObject.SetActive(false);
         }
 
+        public void fillMenu()
+        {
+            Transform contentPanel = this.transform.Find("Panel").Find("Scroll Rect").Find("Content Panel");
+            CameraVanEdit cve = GameObject.Find("Canvas").transform.Find("CameraVanEdit").GetComponent<CameraVanEdit>();
+            if(cve.cameraList == null || cve.cameraList.Count < 1 || contentPanel.childCount > 1)
+                return;
+
+
+            for(int k = 0 ; k < cve.cameraList.Count-1; k++)
+                clickAddCamera();
+
+            int iterator = 0;
+
+            foreach (Transform cameraSetting in contentPanel)
+            {
+                CameraSetting item = cve.cameraList[iterator++]; 
+                Transform panel = cameraSetting.Find("Panel");
+                panel.Find("TextID").GetComponent<Text>().text = item.id;
+                panel.Find("IFpitch").GetComponent<InputField>().text = item.pitch.ToString();
+                panel.Find("IFYaw").GetComponent<InputField>().text = item.yaw.ToString();
+                panel.Find("IFRoll").GetComponent<InputField>().text = item.roll.ToString();
+                panel.Find("IFfov").GetComponent<InputField>().text = item.fieldOfView.ToString();
+                panel.Find("IFposX").GetComponent<InputField>().text = item.position.x.ToString();
+                panel.Find("IFposY").GetComponent<InputField>().text = item.position.y.ToString();
+                panel.Find("IFposZ").GetComponent<InputField>().text = item.position.z.ToString();               
+            }
+
+
+        }
 
     }
 }

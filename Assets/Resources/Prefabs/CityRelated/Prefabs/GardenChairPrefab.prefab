@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 457518}
   - 33: {fileID: 3384262}
   - 23: {fileID: 2327836}
-  - 65: {fileID: 6557206}
+  - 64: {fileID: 6487052}
   m_Layer: 0
   m_Name: GardenChairPrefab
   m_TagString: Untagged
@@ -25,7 +25,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 117026}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -32.2776489, y: 230.848404, z: 178.543518}
+  m_LocalPosition: {x: 345.895294, y: 351.272583, z: -539.489929}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -61,8 +61,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 117026}
   m_Mesh: {fileID: 4300000, guid: b309c960ef7b2174cbca283b444f70e5, type: 3}
---- !u!65 &6557206
-BoxCollider:
+--- !u!64 &6487052
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -71,8 +71,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.81688309, y: 1.17088735, z: .805915833}
-  m_Center: {x: 0, y: .589999974, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: b309c960ef7b2174cbca283b444f70e5, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

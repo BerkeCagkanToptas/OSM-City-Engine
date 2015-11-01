@@ -1064,10 +1064,10 @@ public class TransformGizmos : MonoBehaviour {
 		
 	}
 	void TurnOnOutline(){
-		if (gameObject.GetComponent<Collider>() == null || gameObject.GetComponent<Collider>().enabled == false) {
-			Debug.LogError("You Cannot use Code('SelectedObjOutline') without a Collider");
-			return;
-		}
+        //if (gameObject.GetComponent<Collider>() == null || gameObject.GetComponent<Collider>().enabled == false) {
+        //    Debug.LogError("You Cannot use Code('SelectedObjOutline') without a Collider");
+        //    return;
+        //}
 		
 
 		

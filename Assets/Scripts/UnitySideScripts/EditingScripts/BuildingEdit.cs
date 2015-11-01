@@ -209,7 +209,7 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             Material currentMaterial = building.facades[facadeID].GetComponent<MeshRenderer>().material;
             RIcolor.texture = currentMaterial.mainTexture;
             RInormal.texture = currentMaterial.GetTexture("_BumpMap");
-            RIspecular.texture = currentMaterial.GetTexture("_SpecGlossMap");
+           // RIspecular.texture = currentMaterial.GetTexture("_SpecGlossMap");
             RIuv.texture = currentMaterial.mainTexture;
 
             Mesh facadeMesh = building.facades[facadeID].GetComponent<MeshFilter>().mesh;

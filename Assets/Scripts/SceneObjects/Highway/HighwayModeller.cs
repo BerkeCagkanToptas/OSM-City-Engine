@@ -84,10 +84,33 @@ namespace Assets.Scripts.SceneObjects
             generateHighwayList();
             generatePavementList();
         }
+        
+        
+        public HighwayModeller(List<Way> _wayList, myTerrain _terrain, List<HighwayConfigurations> _configurations, List<HighwaySave> highwaySaveList)
+        {
+            wayList = _wayList;
+            highwayList = new List<Highway>();
+            pavementList = new List<Pavement>();
+            terrain = _terrain;
+            configurations = _configurations;
+            generateHighwayList(highwaySaveList);
+            generatePavementList();
+        }
+        
         public void renderHighwayList()
         {
             for (int i = 0; i < highwayList.Count; i++)
-                highwayList[i].renderHighway();
+            {
+                try
+                {
+                    highwayList[i].renderHighway();
+                }
+                catch (Exception ex)
+                {
+                    Debug.Log("<color=red>ERROR:</color>" + ex.Message);
+                    continue;
+                }
+            }
         }
         public void renderPavementList()
         {
@@ -138,7 +161,17 @@ namespace Assets.Scripts.SceneObjects
                 if (intersections[i].wayIds.Count == 2)
                     correct2wayIntersection(intersections[i]);
                 else
-                    correctIntersection(intersections[i]);
+                {
+                    try
+                    {
+                        correctIntersection(intersections[i]);
+                    }
+                    catch (Exception ex)
+                    {
+                        resetIntersectionNode(intersections[i]);
+                        continue;
+                    }
+                }
             }
 
             DrapeHighway draper = new DrapeHighway();
@@ -173,6 +206,55 @@ namespace Assets.Scripts.SceneObjects
 
 
         }
+
+        private void generateHighwayList(List<HighwaySave> saveList)
+        {
+            //Eliminate small highways that cause problems
+            for (int i = 0; i < wayList.Count; i++)
+            {
+                float length = 0;
+                bool isNormal = false;
+                for (int k = 0; k < wayList[i].nodes.Count - 1; k++)
+                {
+                    length += (wayList[i].nodes[k + 1].meterPosition - wayList[i].nodes[k].meterPosition).magnitude;
+                    if (length >= 5.0f)
+                    {
+                        isNormal = true;
+                        break;
+                    }
+                }
+
+                if (!isNormal)
+                {
+                    wayList.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            intersections = generateIntersectionList();
+
+
+            divideNecessaryWays();
+
+            for (int i = 0; i < wayList.Count; i++)
+            {               
+                highwayList.Add(new Highway(wayList[i], configurations, terrain,saveList[i]));
+            }
+
+            for (int i = 0; i < intersections.Count; i++)
+            {
+                if (intersections[i].wayIds.Count == 2)
+                    correct2wayIntersection(intersections[i]);
+                else
+                    correctIntersection(intersections[i]);
+            }
+
+            DrapeHighway draper = new DrapeHighway();
+            for (int i = 0; i < highwayList.Count; i++)
+                draper.DrapeRoad(terrain, highwayList[i].leftSideVertexes, highwayList[i].rightSideVertexes);
+
+        }
+
 
         /// <summary>
         /// Divide necessary ways into multiple pieces for easier intersection handling
@@ -669,7 +751,6 @@ namespace Assets.Scripts.SceneObjects
         }
 
 
-
         private void correctIntersection(IntersectionNode intersection)
         {
 
@@ -744,8 +825,9 @@ namespace Assets.Scripts.SceneObjects
             {
                 if (iterationCount == 10)
                 {
-                    Debug.Log("ERRROR IN THE WHILE LOOP !!!");
-                    break;
+                    throw new System.InvalidOperationException("Sorted Angles entered to a loop");
+                    //Debug.Log("ERRROR IN THE WHILE LOOP !!!");
+                    //break;
                 }
                 else
                     iterationCount++;
@@ -772,8 +854,9 @@ namespace Assets.Scripts.SceneObjects
                                                       forwardVectors[way1No], forwardVectors[way2No], true);
                     else
                     {
-                        Debug.Log("HUNGUR HUNGUR AGLARIM LAN !!!");
-                        iside = new intersectionside();
+                        Debug.Log("SOMETHING SHOULD BE REALLY WRONG ABOUT HIGHWAYS :(  !!!");
+                        throw new System.InvalidOperationException("Forced Intersection somehow does not work!");
+                        //iside = new intersectionside();
                     }
                 }
 
@@ -978,6 +1061,7 @@ namespace Assets.Scripts.SceneObjects
 
             else
             {
+                throw new System.InvalidOperationException("Bormal Intersection Failed!!");
                 Debug.Log("------------------------------");
                 intersectionside s = new intersectionside();
                 s.vertex = new Vector3(0, 0, 0);
@@ -1003,6 +1087,10 @@ namespace Assets.Scripts.SceneObjects
             if(leftright)
             {
                 Geometry.getVectorIntersection(ref intersect, segment1.Left1, segment1.Left2, fwd1, segment2.Right1, segment2.Right2, fwd2);
+
+                if (intersect.magnitude == 0)
+                    throw new System.InvalidOperationException("Intersection Failed!");
+                
                 Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);
                 applyIntersection(way1No, way2No, highwayIndex1, highwayIndex2, newVertex, intersection, true);
 
@@ -1017,6 +1105,10 @@ namespace Assets.Scripts.SceneObjects
             else
             {
                 Geometry.getVectorIntersection(ref intersect, segment1.Right1, segment1.Right2, fwd1, segment2.Left1, segment2.Left2, fwd2);
+
+                if (intersect.magnitude == 0)
+                    throw new System.InvalidOperationException("Intersection Failed!");
+                
                 Vector3 newVertex = new Vector3(intersect.x, terrain.getTerrainHeight2(intersect.y + terrain.terrainInfo.shiftZ, intersect.x + terrain.terrainInfo.shiftX), intersect.y);
                 applyIntersection(way1No, way2No, highwayIndex1, highwayIndex2, newVertex, intersection, false);
 

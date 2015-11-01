@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 400000}
   - 33: {fileID: 3300000}
   - 23: {fileID: 2300000}
-  - 65: {fileID: 6537344}
+  - 64: {fileID: 6451944}
   m_Layer: 0
   m_Name: TrafficLight3Prefab
   m_TagString: Untagged
@@ -28,7 +28,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 7.52223102e-08, y: 3.12045286e-15, z: -4.14830765e-08, w: 1}
-  m_LocalPosition: {x: 315.459991, y: 317.829987, z: -394.019989}
+  m_LocalPosition: {x: 349.313507, y: 353.801025, z: -541.443176}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -73,8 +73,8 @@ MeshFilter:
 --- !u!1002 &3300001
 EditorExtensionImpl:
   serializedVersion: 6
---- !u!65 &6537344
-BoxCollider:
+--- !u!64 &6451944
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -83,8 +83,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.67117167, y: 8.44984818, z: 4.03650093}
-  m_Center: {x: .0130141675, y: 4.22492409, z: -1.85689449}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: b1b822bcb08294be5a3bdc826fb3e4db, type: 3}
 --- !u!1002 &11100001
 EditorExtensionImpl:
   serializedVersion: 6

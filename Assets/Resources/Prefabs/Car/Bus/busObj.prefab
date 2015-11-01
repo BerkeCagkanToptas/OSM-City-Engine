@@ -8,7 +8,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 411130}
-  - 65: {fileID: 6536338}
   m_Layer: 0
   m_Name: busObj
   m_TagString: Untagged
@@ -26,6 +25,7 @@ GameObject:
   - 4: {fileID: 453644}
   - 33: {fileID: 3374710}
   - 23: {fileID: 2330780}
+  - 64: {fileID: 6407928}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100744}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 70.3386688, y: 330.377289, z: -13.5153666}
+  m_LocalPosition: {x: 1130.30286, y: 330.823364, z: 284.115845}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 453644}
@@ -91,18 +91,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 122540}
   m_Mesh: {fileID: 4300000, guid: e5b6ce57f28a67346a1a493bff3b5813, type: 3}
---- !u!65 &6536338
-BoxCollider:
+--- !u!64 &6407928
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100744}
+  m_GameObject: {fileID: 122540}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 4, y: 4, z: 13}
-  m_Center: {x: 0, y: 2.0999999, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: e5b6ce57f28a67346a1a493bff3b5813, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

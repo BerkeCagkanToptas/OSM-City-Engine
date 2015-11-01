@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 461472}
   - 33: {fileID: 3355386}
   - 23: {fileID: 2316810}
-  - 65: {fileID: 6590686}
+  - 64: {fileID: 6472378}
   m_Layer: 0
   m_Name: StreetLampPrefab
   m_TagString: Untagged
@@ -25,7 +25,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 148632}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -31.6356487, y: 230.409409, z: 170.504715}
+  m_LocalPosition: {x: 345.998688, y: 351.045349, z: -539.269287}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -61,8 +61,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 148632}
   m_Mesh: {fileID: 4300000, guid: 9d9b9e265b920da44a9378270a47147e, type: 3}
---- !u!65 &6590686
-BoxCollider:
+--- !u!64 &6472378
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -71,8 +71,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.70863402, y: 4.19580746, z: .628892183}
-  m_Center: {x: .587500036, y: 3.5079174, z: 2.2968688}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: 9d9b9e265b920da44a9378270a47147e, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

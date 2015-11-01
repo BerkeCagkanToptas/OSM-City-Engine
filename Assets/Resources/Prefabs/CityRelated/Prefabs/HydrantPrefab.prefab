@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 449326}
   - 33: {fileID: 3363706}
   - 23: {fileID: 2324352}
-  - 65: {fileID: 6571258}
+  - 64: {fileID: 6420752}
   m_Layer: 0
   m_Name: HydrantPrefab
   m_TagString: Untagged
@@ -25,7 +25,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 136696}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -27.6163483, y: 230.552719, z: 174.475769}
+  m_LocalPosition: {x: 345.86441, y: 352.451202, z: -537.246277}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -61,8 +61,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 136696}
   m_Mesh: {fileID: 4300000, guid: df3e195e1c101634ea7db6ad132aaa29, type: 3}
---- !u!65 &6571258
-BoxCollider:
+--- !u!64 &6420752
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -71,8 +71,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .840088964, y: 1.56701434, z: .799060524}
-  m_Center: {x: -.00500001013, y: .780627191, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: df3e195e1c101634ea7db6ad132aaa29, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

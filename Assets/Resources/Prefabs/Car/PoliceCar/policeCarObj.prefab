@@ -10,6 +10,7 @@ GameObject:
   - 4: {fileID: 412892}
   - 33: {fileID: 3337844}
   - 23: {fileID: 2352264}
+  - 64: {fileID: 6489748}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -25,7 +26,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 422580}
-  - 65: {fileID: 6552568}
   m_Layer: 0
   m_Name: policeCarObj
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 147710}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: .370000005, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 422580}
@@ -52,7 +52,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 173744}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 72.8879471, y: 340.013611, z: -12.235507}
+  m_LocalPosition: {x: 1141.07996, y: 308.149994, z: 247.330002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 412892}
@@ -91,18 +91,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 147710}
   m_Mesh: {fileID: 4300000, guid: 9627dc0d1c8a56949907e8da29173e90, type: 3}
---- !u!65 &6552568
-BoxCollider:
+--- !u!64 &6489748
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 173744}
+  m_GameObject: {fileID: 147710}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 2, z: 6}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: 9627dc0d1c8a56949907e8da29173e90, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using Assets.Scripts.UnitySideScripts;
+using Assets.Scripts.UnitySideScripts.Menus.Alert;
 
 public class MainMenu : MonoBehaviour 
 {
@@ -37,7 +38,8 @@ public class MainMenu : MonoBehaviour
         {
             if (camControl.target == null)
             {
-                GameObject.Find("Canvas").transform.Find("NoCameraVanErrorWindow").gameObject.SetActive(true);
+                Alert alertdialog = new Alert();
+                alertdialog.openInteractableAlertDialog("ERROR", "No Camera Van was detected. Please use 'Object Bar' at the bottom of screen to add a Camera Van.");
                 return;
             }
             else

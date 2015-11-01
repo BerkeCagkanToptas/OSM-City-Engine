@@ -150,13 +150,5 @@ namespace Assets.Scripts.HeightMap
             }
         }
 
-        private void getContinent(BBox bbox)
-        {
-            //if(bbox.left > 119.0f && bbox.right < 150.0f && bbox.bottom)
-
-
-
-        }
-
     }
 }

@@ -8,6 +8,8 @@ using System.IO;
 using Assets.Scripts.UnitySideScripts.MouseScripts;
 using Assets.Scripts.ConfigHandler;
 using Assets.Scripts.UnitySideScripts.Menus;
+using Assets.Scripts.UnitySideScripts.Menus.Alert;
+using System.Collections;
 
 public class LoadSaveMenu : MonoBehaviour
 {
@@ -108,8 +110,7 @@ public class LoadSaveMenu : MonoBehaviour
         else
             continent = HeightmapContinent.North_America;
 
-        scene = new Scene();
-        scene.initializeScene(_if.text, continent, provider);
+        StartCoroutine(loadScene(_if.text, continent, provider));
 
     }
 
@@ -117,8 +118,7 @@ public class LoadSaveMenu : MonoBehaviour
     {
         InputField _if = transform.Find("Panel_LoadSaveMenu").Find("InputField_SelectProject").GetComponent<InputField>();         
         LoadConfig loadConfig = new LoadConfig(_if.text);
-        scene = new Scene();
-        scene.loadProject(loadConfig.sceneSave);
+        StartCoroutine(loadScene(loadConfig));
     }
 
     public void ClickLoadProjectBrowse()
@@ -136,4 +136,27 @@ public class LoadSaveMenu : MonoBehaviour
         fbd.draw(myFileBrowserDialog.BrowserMode.FolderSelect, di, new string[] { ".xml" });
     }
 
+
+    private IEnumerator loadScene(string osmFileName,HeightmapContinent continent, MapProvider provider)
+    {
+        scene = new Scene();
+        Alert alert = new Alert();
+        alert.openAlertDialog("Loading project might take a couple of minute. Please wait...");
+        yield return new WaitForSeconds(0.2f);
+        scene.initializeScene(osmFileName, continent, provider);
+        alert.closeAlertDialog();
+        this.gameObject.SetActive(false);
+        yield return true;
+    }
+    private IEnumerator loadScene(LoadConfig load)
+    {
+        Alert alert = new Alert();
+        alert.openAlertDialog("Loading project might take a couple of minute. Please wait...");
+        yield return new WaitForSeconds(0.2f);
+        scene = new Scene();
+        scene.loadProject(load.sceneSave);
+        alert.closeAlertDialog();
+        this.gameObject.SetActive(false);
+        yield return true;
+    }
 }

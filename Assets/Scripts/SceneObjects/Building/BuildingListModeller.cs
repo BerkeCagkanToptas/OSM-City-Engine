@@ -17,8 +17,8 @@ namespace Assets.Scripts.SceneObjects
 
         public BuildingListModeller(List<Way> buildingWay, List<BuildingRelation> buildingRelation, BuildingConfigurations config)
         {
+         
             setMaterialList(config);
-
 
             buildingList = new List<Building>();
 
@@ -27,9 +27,17 @@ namespace Assets.Scripts.SceneObjects
                 float materialtexWidth = 10;
                 int materialID = -1;
                 Material mat = getMaterial(buildingRelation[i].tags, config, ref materialtexWidth, ref materialID);
-                buildingList.Add(new Building(buildingRelation[i], config,mat,materialID, materialtexWidth));
-              
+                try
+                {
+                    buildingList.Add(new Building(buildingRelation[i], config, mat, materialID, materialtexWidth));
+                }
+                catch (Exception ex)
+                {
+                    Debug.Log("<color=red>Building ERROR:</color>" + ex.Message);
+                    continue;
+                }
             }
+
             for (int i = 0; i < buildingWay.Count; i++)
             {
                 if(!buildingList.Exists(item => item.id == buildingWay[i].id))
@@ -37,7 +45,15 @@ namespace Assets.Scripts.SceneObjects
                     float materialtexWidth = 10;
                     int materialID = -1;
                     Material mat = getMaterial(buildingWay[i].tags, config, ref materialtexWidth, ref materialID);
-                    buildingList.Add(new Building(buildingWay[i], config, mat,materialID, materialtexWidth));
+                    try
+                    {
+                        buildingList.Add(new Building(buildingWay[i], config, mat, materialID, materialtexWidth));
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("<color=red>Building ERROR:</color>" + ex.Message);
+                        continue;
+                    }
                 }
                     
             }
@@ -51,15 +67,24 @@ namespace Assets.Scripts.SceneObjects
             buildingList = new List<Building>();
 
             for (int i = 0; i < buildingRelation.Count; i++)
-            {
+            {                
                 int saveIndex = buildingSave.FindIndex(item=> item.buildingID == buildingRelation[i].id);
                 if (saveIndex == -1)
                     continue;
                 float materialtexWidth = 10;
                 int materialID = buildingSave[saveIndex].materialID;
                 Material mat = getMaterial(materialID,config,ref materialtexWidth);
-                buildingList.Add(new Building(buildingRelation[i], config, mat, materialID, materialtexWidth));
-                buildingList[buildingList.Count-1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);      
+                try
+                {
+
+                    buildingList.Add(new Building(buildingRelation[i], config, mat, materialID, materialtexWidth));
+                    buildingList[buildingList.Count - 1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Log("<color=red>Building ERROR:</color>" + ex.Message);
+                    continue;
+                }
             }
 
             for (int i = 0; i < buildingWay.Count; i++)
@@ -72,8 +97,16 @@ namespace Assets.Scripts.SceneObjects
                     float materialtexWidth = 10;
                     int materialID = buildingSave[saveIndex].materialID;
                     Material mat = getMaterial(materialID, config, ref materialtexWidth);
-                    buildingList.Add(new Building(buildingWay[i], config, mat, materialID, materialtexWidth));
-                    buildingList[buildingList.Count - 1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);
+                    try
+                    {
+                        buildingList.Add(new Building(buildingWay[i], config, mat, materialID, materialtexWidth));
+                        buildingList[buildingList.Count - 1].facadeSkins = new List<FacadeSkin>(buildingSave[saveIndex].skins);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("<color=red>Building ERROR:</color>" + ex.Message);
+                        continue;
+                    }
                 }
             }
 
@@ -135,7 +168,7 @@ namespace Assets.Scripts.SceneObjects
             for (int k = 0; k < buildingConfig.defaultSkins.Count; k++)
             {
                 BuildingMaterial bmat = buildingConfig.defaultSkins[k];
-                Material mat = InGameTextureHandler.createMaterial(bmat.colorTexturePath, bmat.normalTexturePath, bmat.specularTexturePath);
+                Material mat = InGameTextureHandler.createMaterial2(bmat.colorTexturePath, bmat.normalTexturePath, bmat.specularTexturePath);
                 materialList.Add(mat);
             }
 

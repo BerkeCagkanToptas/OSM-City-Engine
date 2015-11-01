@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 485184}
   - 33: {fileID: 3339674}
   - 23: {fileID: 2325408}
-  - 65: {fileID: 6508094}
+  - 64: {fileID: 6433160}
   m_Layer: 0
   m_Name: PhoneBoxPrefab
   m_TagString: Untagged
@@ -25,7 +25,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 124204}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -28.9299278, y: 231.567886, z: 176.989349}
+  m_LocalPosition: {x: 345.920868, y: 351.389404, z: -538.67804}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -61,8 +61,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 124204}
   m_Mesh: {fileID: 4300000, guid: 8cc7222f0531a1747b2a8b1e856dff5c, type: 3}
---- !u!65 &6508094
-BoxCollider:
+--- !u!64 &6433160
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -71,8 +71,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.18800008, y: 2.94249535, z: 1.18800008}
-  m_Center: {x: 0, y: 1.47124767, z: -.0879999995}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: 8cc7222f0531a1747b2a8b1e856dff5c, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

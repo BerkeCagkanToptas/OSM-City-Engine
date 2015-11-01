@@ -11,7 +11,7 @@ namespace Assets.Scripts.UnitySideScripts.ControllerScripts
     class ControllerCam : MonoBehaviour
     {
         private Camera camera;
-        private CameraVanCameraSettings.CameraSettingItem camSetting;
+        private CameraSetting camSetting;
         private RenderTexture rt;
         private int resolutionWidth, resolutionHeight;
         public string saveFolder;
@@ -43,7 +43,7 @@ namespace Assets.Scripts.UnitySideScripts.ControllerScripts
         }
 
 
-        public void loadSetting(CameraVanCameraSettings.CameraSettingItem _camSetting)
+        public void loadSetting(CameraSetting _camSetting)
         {
             if (rt == null)
             {
@@ -61,7 +61,7 @@ namespace Assets.Scripts.UnitySideScripts.ControllerScripts
             camSetting = _camSetting;
             camera.transform.position = _camSetting.position;
             Quaternion quat = new Quaternion();
-            quat.eulerAngles = new Vector3(-_camSetting.pitch,-_camSetting.yaw,_camSetting.roll);
+            quat.eulerAngles = new Vector3(-_camSetting.pitch,-_camSetting.yaw,-_camSetting.roll);
             camera.transform.localRotation = quat;
             camera.name = _camSetting.id;
             camera.fieldOfView = _camSetting.fieldOfView;

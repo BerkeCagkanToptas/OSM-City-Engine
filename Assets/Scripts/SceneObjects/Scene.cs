@@ -9,6 +9,8 @@ using Assets.Scripts.OpenStreetMap;
 using UnityEngine;
 using System.IO;
 using Assets.Scripts.UnitySideScripts.MouseScripts;
+using Assets.Scripts.UnitySideScripts;
+using Assets.Scripts.UnitySideScripts.EditingScripts;
 
 namespace Assets.Scripts.SceneObjects
 {
@@ -23,6 +25,7 @@ namespace Assets.Scripts.SceneObjects
         public List<Barrier> barrierList;
         public List<Object3D> defaultObject3DList;
         public List<Object3D> object3DList;
+        public GameObject controller;
 
         public myTerrain terrain;
         public InitialConfigurations config;
@@ -46,12 +49,9 @@ namespace Assets.Scripts.SceneObjects
         /// <summary>
         ///  Constructs the scene from given parameters
         /// </summary>
-        /// <param name="OSMfilename"></param>
-        /// Full path of OSM file
-        /// <param name="continent"></param>
-        /// Specify Continent to download correct Heightmap from Nasa Srtm Data
-        /// <param name="provider"></param>
-        /// Choose mapProvider to select Texture of Terrain
+        /// <param name="OSMfilename">Full path of OSM file</param> 
+        /// <param name="continent">Specify Continent to download correct Heightmap from Nasa Srtm Data</param>
+        /// <param name="provider">Choose mapProvider to select Texture of Terrain</param> 
         public void initializeScene(string OSMfilename, HeightmapContinent _continent, MapProvider _provider)
         {
             string[] subStr = OSMfilename.Split(new char[] { '/', '\\' });
@@ -74,19 +74,20 @@ namespace Assets.Scripts.SceneObjects
             scenebbox = editbbox(scenebbox);
             config = configloader.loadInitialConfig();
 
-            stopwatch.Stop();
-            Debug.Log("<color=blue>PARSING TIME:</color>" + stopwatch.ElapsedMilliseconds);
-            stopwatch.Reset();
-            stopwatch.Start();
 
             HeightmapLoader heightMap = new HeightmapLoader(scenebbox, continent);
             terrain = new myTerrain(heightMap, scenebbox, OSMfilename, provider);
+
+            stopwatch.Stop();
+            Debug.Log("<color=blue>TERRAIN RENDER TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();       
+            stopwatch.Start();
 
             osmxml = parser.parseOSM(OSMfilename);
             assignNodePositions();
 
             stopwatch.Stop();
-            Debug.Log("<color=blue>TERRAIN RENDER TIME:</color>" + stopwatch.ElapsedMilliseconds);
+            Debug.Log("<color=blue>OSM PARSING TIME:</color>" + stopwatch.ElapsedMilliseconds);
             stopwatch.Reset();
             stopwatch.Start();
 
@@ -139,7 +140,7 @@ namespace Assets.Scripts.SceneObjects
             Debug.Log("<color=blue>HIGHWAY RENDERING TIME:</color>" + stopwatch.ElapsedMilliseconds);
             stopwatch.Reset();
             stopwatch.Start();
-
+            
             BuildingListModeller buildingListModeller = new BuildingListModeller(WayListforBuilding, osmxml.buildingRelations, config.buildingConfig);
             buildingListModeller.renderBuildingList();
             buildingList = buildingListModeller.buildingList;
@@ -151,13 +152,17 @@ namespace Assets.Scripts.SceneObjects
 
         }
 
+        /// <summary>
+        /// Load urban scene using a save file
+        /// </summary>
+        /// <param name="save"> Save file object </param>
         public void loadProject(SceneSave save)
         {
             List<Way> WayListforHighway = new List<Way>();
             List<Way> WayListforBuilding = new List<Way>();
 
             InitialConfigLoader configloader = new InitialConfigLoader();
-
+            OSMPath = save.osmPath;
             OSMparser parser = new OSMparser();
             scenebbox = parser.readBBox(save.osmPath);
             scenebbox = editbbox(scenebbox);
@@ -170,12 +175,18 @@ namespace Assets.Scripts.SceneObjects
 
             defaultObject3DList = DefaultObject3DHandler.drawDefaultObjects(osmxml.defaultobject3DList);
 
+            LoadExternalOBJ objloader = new LoadExternalOBJ();
+
             //3D OBJECT LOAD
             for(int i = 0 ; i < save.objectSaveList.Count ; i++)
             {
                 Object3D obj = new Object3D();
                 obj.name = save.objectSaveList[i].name;
-                obj.object3D = (GameObject)MonoBehaviour.Instantiate(Resources.Load(save.objectSaveList[i].resourcePath));
+
+                if (save.objectSaveList[i].type == ObjectType.External)
+                    obj.object3D = objloader.loadOBJ(save.objectSaveList[i].resourcePath);
+                else
+                    obj.object3D = (GameObject)MonoBehaviour.Instantiate(Resources.Load(save.objectSaveList[i].resourcePath));
                 obj.object3D.AddComponent<Object3dMouseHandler>();
                 obj.resourcePath = save.objectSaveList[i].resourcePath;
                 obj.object3D.transform.position = save.objectSaveList[i].translate;
@@ -186,6 +197,7 @@ namespace Assets.Scripts.SceneObjects
                 obj.object3D.name = obj.name;
                 obj.object3D.tag = "3DObject";
                 object3DList.Add(obj);
+                
             }
 
             for (int k = 0; k < osmxml.wayList.Count; k++)
@@ -213,7 +225,7 @@ namespace Assets.Scripts.SceneObjects
                 }
             }
 
-            highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig);
+            highwayModeller = new HighwayModeller(WayListforHighway, terrain, config.highwayConfig, save.highwaySaveList);
             highwayModeller.renderHighwayList();
             highwayModeller.renderPavementList();
             highwayList = highwayModeller.highwayList;
@@ -223,9 +235,51 @@ namespace Assets.Scripts.SceneObjects
             buildingListModeller.renderBuildingList();
             buildingList = buildingListModeller.buildingList;
 
+            if (save.controller == null)
+                return;
+
+            if(save.controller.controllerType == ControllerSave.ControllerType.CameraVan)
+            {
+                Transform mainCamera = GameObject.Find("Main Camera").transform;
+                CameraController camController = mainCamera.GetComponent<CameraController>();
+
+                controller = (GameObject)GameObject.Instantiate(Resources.Load("Prefabs/Car/PolimiCameraCar/CameraVan"));
+                controller.AddComponent<CameraVanMouseHandler>();
+                controller.tag = "CameraVan";
+                controller.name = "Camera Van";
+                controller.transform.position = mainCamera.position + mainCamera.forward * 10.0f;
+                controller.GetComponent<Rigidbody>().useGravity = false;
+                camController.target = controller.transform;
+            }
+
+            else
+            {
+                Transform mainCamera = GameObject.Find("Main Camera").transform;
+                CameraController camController = mainCamera.GetComponent<CameraController>();
+
+                controller = (GameObject)GameObject.Instantiate(Resources.Load("Prefabs/Ethan/ThirdPersonController"));
+                controller.AddComponent<CameraVanMouseHandler>();
+                controller.tag = "CameraVan";
+                controller.name = "Third Person (Ethan)";
+                controller.transform.position = mainCamera.position + mainCamera.forward * 10.0f;
+                camController.target = controller.transform;
+            }
+
+            controller.transform.position = save.controller.controllerPosition;
+            Quaternion controllerQuat = new Quaternion();
+            controllerQuat.eulerAngles = save.controller.controllerRotation;
+            controller.transform.rotation = controllerQuat;
+
+            CameraVanEdit cve = GameObject.Find("Canvas").transform.Find("CameraVanEdit").GetComponent<CameraVanEdit>();
+            cve.cameraList = save.controller.convertBackToCamList(save.controller.cameraSettings);
+            cve.laserScanner = save.controller.convertBackToLaser(save.controller.laserSetting);
+
         }
 
-        //Converts Spherical Mercator Coordinates to Unity Coordinates
+        
+        /// <summary>
+        /// Converts Spherical Mercator Coordinates of all nodes to Unity Coordinates
+        /// </summary>      
         private void assignNodePositions()
         {
             Geography proj = new Geography();
@@ -270,7 +324,11 @@ namespace Assets.Scripts.SceneObjects
 
         }
 
-        //Apply Correction to the Osm bbox
+        /// <summary>
+        /// Convert Spherical Mercator Coordinates of scene BBox to Unity Coordinates
+        /// </summary>
+        /// <param name="bbox"> bbox obtained from OSM file </param>
+        /// <returns></returns>
         private BBox editbbox(BBox bbox)
         {
             Geography proj = new Geography();

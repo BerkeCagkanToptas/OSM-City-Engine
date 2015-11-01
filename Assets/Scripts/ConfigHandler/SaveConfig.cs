@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.HeightMap;
 using Assets.Scripts.SceneObjects;
+using Assets.Scripts.UnitySideScripts.EditingScripts;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,6 +35,9 @@ namespace Assets.Scripts.ConfigHandler
         [XmlArray("ObjectSaveList")]
         [XmlArrayItem("Object")]
         public List<ObjectSave> objectSaveList;
+
+        [XmlElement("Controller")]
+        public ControllerSave controller;
     }
 
 
@@ -76,6 +80,104 @@ namespace Assets.Scripts.ConfigHandler
     }
 
 
+    public class ControllerSave
+    {
+        [Serializable]
+        public struct SaveCameraSetting
+        {
+            public string id;
+            public Vector3 position;
+            public float yaw, pitch, roll, FOV;
+        }
+
+        [Serializable]
+        public struct SaveLaserSetting
+        {
+            public Vector3 position;
+            public Vector3 rotation;
+            public float FOVvertical, FOVhorizontal, resVertical, resHorizontal;
+            public float minDistance, maxDistance;
+            public int frameRate;
+        }
+
+        public enum ControllerType { CameraVan, Trekker}
+        public SaveLaserSetting laserSetting;
+
+        public List<SaveCameraSetting> cameraSettings;
+        public ControllerType controllerType;
+        public Vector3 controllerRotation;
+        public Vector3 controllerPosition;
+
+        public SaveLaserSetting convertToSaveLaser(LaserSetting laserSetting)
+        {
+            SaveLaserSetting sls = new SaveLaserSetting();
+            sls.FOVhorizontal = laserSetting.horizontalFOV;
+            sls.FOVvertical = laserSetting.verticalFOV;
+            sls.resHorizontal = laserSetting.horizontalResolution;
+            sls.resVertical = laserSetting.verticalResolution;
+            sls.position = laserSetting.position;
+            sls.rotation = laserSetting.rotation;
+            sls.minDistance = laserSetting.minDistance;
+            sls.maxDistance = laserSetting.maxDistance;
+            sls.frameRate = laserSetting.frameRate;
+
+            return sls;
+        }
+        public List<SaveCameraSetting> convertToSaveCamList(List<CameraSetting> cameraSetting)
+        {
+            List<SaveCameraSetting> newCamSettingList = new List<SaveCameraSetting>();
+
+            for (int k = 0; k < cameraSetting.Count; k++)
+            {
+                SaveCameraSetting scs = new SaveCameraSetting();
+                scs.FOV = cameraSetting[k].fieldOfView;
+                scs.id = cameraSetting[k].id;
+                scs.pitch = cameraSetting[k].pitch;
+                scs.roll = cameraSetting[k].roll;
+                scs.yaw = cameraSetting[k].yaw;
+                scs.position = cameraSetting[k].position;
+                newCamSettingList.Add(scs);
+            }
+            return newCamSettingList;
+        }
+
+        public LaserSetting convertBackToLaser(SaveLaserSetting saveLaser)
+        {
+            LaserSetting ls = new LaserSetting();
+            ls.minDistance = saveLaser.minDistance;
+            ls.maxDistance = saveLaser.maxDistance;
+            ls.horizontalFOV = saveLaser.FOVhorizontal;
+            ls.verticalFOV = saveLaser.FOVvertical;
+            ls.verticalResolution = saveLaser.resVertical;
+            ls.horizontalResolution = saveLaser.resHorizontal;
+            ls.position = saveLaser.position;
+            ls.rotation = saveLaser.rotation;
+            ls.frameRate = saveLaser.frameRate;
+
+            return ls;
+        }
+
+        public List<CameraSetting> convertBackToCamList(List<SaveCameraSetting> saveCamList)
+        {
+            List<CameraSetting> camSettingList = new List<CameraSetting>();
+            
+            for(int k = 0 ; k < saveCamList.Count ; k++)
+            {
+                CameraSetting cs = new CameraSetting();
+                cs.position = saveCamList[k].position;
+                cs.roll = saveCamList[k].roll;
+                cs.yaw = saveCamList[k].yaw;
+                cs.pitch = saveCamList[k].pitch;
+                cs.id = saveCamList[k].id;
+                cs.fieldOfView = saveCamList[k].FOV;
+                camSettingList.Add(cs);
+            }
+
+            return camSettingList;
+        }
+
+    }
+
     class SaveConfig
     {
 
@@ -100,6 +202,7 @@ namespace Assets.Scripts.ConfigHandler
             saveBuildingConfig();
             saveHighwayConfig();
             saveObjectConfig();
+            saveControllerConfig();
 
             var serializer = new XmlSerializer(typeof(SceneSave));
             var encoding = Encoding.GetEncoding("UTF-8");
@@ -174,7 +277,26 @@ namespace Assets.Scripts.ConfigHandler
 
         }
 
+        private void saveControllerConfig()
+        {
+            if (scene.controller == null)
+                return;
 
+            CameraVanEdit cve = GameObject.Find("Canvas").transform.Find("CameraVanEdit").GetComponent<CameraVanEdit>();
+                      
+            sceneSave.controller = new ControllerSave();
+            sceneSave.controller.laserSetting = sceneSave.controller.convertToSaveLaser(cve.laserScanner);
+            sceneSave.controller.cameraSettings = sceneSave.controller.convertToSaveCamList(cve.cameraList);
+
+            if (scene.controller.name == "Camera Van")
+                sceneSave.controller.controllerType = ControllerSave.ControllerType.CameraVan;
+            else
+                sceneSave.controller.controllerType = ControllerSave.ControllerType.Trekker;
+
+            sceneSave.controller.controllerRotation = scene.controller.transform.rotation.eulerAngles;
+            sceneSave.controller.controllerPosition = scene.controller.transform.position;
+
+        }
 
 
 

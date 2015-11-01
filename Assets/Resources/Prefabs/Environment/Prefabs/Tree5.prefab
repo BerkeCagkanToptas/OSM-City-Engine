@@ -10,6 +10,7 @@ GameObject:
   - 4: {fileID: 427154}
   - 33: {fileID: 3318818}
   - 23: {fileID: 2351140}
+  - 64: {fileID: 6478030}
   m_Layer: 0
   m_Name: Material__35_MeshPart0
   m_TagString: Untagged
@@ -25,7 +26,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 457568}
-  - 65: {fileID: 6567138}
   m_Layer: 0
   m_Name: Tree5
   m_TagString: Untagged
@@ -58,6 +58,7 @@ GameObject:
   - 4: {fileID: 488702}
   - 33: {fileID: 3336468}
   - 23: {fileID: 2344246}
+  - 64: {fileID: 6423868}
   m_Layer: 0
   m_Name: Material__35_MeshPart1
   m_TagString: Untagged
@@ -75,6 +76,7 @@ GameObject:
   - 4: {fileID: 496064}
   - 33: {fileID: 3372244}
   - 23: {fileID: 2334928}
+  - 64: {fileID: 6478210}
   m_Layer: 0
   m_Name: L1
   m_TagString: Untagged
@@ -115,7 +117,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 144392}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 296.285919, y: 395.174438, z: -556.786865}
+  m_LocalPosition: {x: 368.190002, y: 396.670013, z: -525.849976}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 496064}
@@ -240,18 +242,42 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 195506}
   m_Mesh: {fileID: 4300000, guid: 3bae717a3223b5646b386cc9e5ef6184, type: 3}
---- !u!65 &6567138
-BoxCollider:
+--- !u!64 &6423868
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 144392}
+  m_GameObject: {fileID: 161242}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 5, y: 12, z: 5}
-  m_Center: {x: 0, y: 7, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300004, guid: 3bae717a3223b5646b386cc9e5ef6184, type: 3}
+--- !u!64 &6478030
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 103692}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 4300002, guid: 3bae717a3223b5646b386cc9e5ef6184, type: 3}
+--- !u!64 &6478210
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 195506}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: 3bae717a3223b5646b386cc9e5ef6184, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

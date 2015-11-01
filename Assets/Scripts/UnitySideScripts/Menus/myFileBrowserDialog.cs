@@ -60,9 +60,9 @@ namespace Assets.Scripts.UnitySideScripts.Menus
             if(contentPanel == null)
                 contentPanel = transform.Find("Panel").Find("ScrollRect").Find("Content Panel");
 
-            folders = currentDirectory.GetDirectories();
+            folders = currentDirectory.GetDirectories().Where(d=> d.Name[0] != '.').ToArray();
             var allowedExtensions = new HashSet<string>(acceptedExtensions, StringComparer.OrdinalIgnoreCase);
-            files = currentDirectory.GetFiles().Where(f => allowedExtensions.Contains(f.Extension)).ToArray();
+            files = currentDirectory.GetFiles().Where(f => allowedExtensions.Contains(f.Extension) && f.Name[0] != '.').ToArray();
 
             selectedPath = currentDirectory.FullName;
 

@@ -26,11 +26,10 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
 
         public void clickDestroy()
         {
-            GameObject lsm = GameObject.Find("Canvas").transform.Find("LoadSave Menu").gameObject;
-            Scene scene = lsm.GetComponent<Scene>();
-            int index = scene.object3DList.FindIndex(o => o.object3D == selectedObj);
+            LoadSaveMenu lsm = GameObject.Find("Canvas").transform.Find("LoadSave Menu").GetComponent<LoadSaveMenu>();
+            int index = lsm.scene.object3DList.FindIndex(o => o.object3D == selectedObj);
             Destroy(selectedObj);
-            scene.object3DList.RemoveAt(index);
+            lsm.scene.object3DList.RemoveAt(index);
             objectEditMenu.SetActive(false);
         }
 

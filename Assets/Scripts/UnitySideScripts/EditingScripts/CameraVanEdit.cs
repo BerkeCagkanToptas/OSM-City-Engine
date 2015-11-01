@@ -9,6 +9,8 @@ using UnityEngine;
 using Assets.Scripts.UnitySideScripts.Menus;
 using System.IO;
 using Assets.Scripts.UnitySideScripts.ControllerScripts;
+using System.Collections;
+using Assets.Scripts.UnitySideScripts.Menus.Alert;
 
 namespace Assets.Scripts.UnitySideScripts.EditingScripts
 {
@@ -18,6 +20,8 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
         [XmlArray("CameraSettings")]
         [XmlArrayItem("Cam")]
         public List<CameraSetting> cameraSettings;
+        [XmlElement("LaserSettings")]
+        public LaserSetting laserSettings;
         [XmlElement("CameraLog")]
         public CameraLog cameraLog;
         [XmlElement("LaserLog")]
@@ -42,22 +46,24 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
 
     public struct LaserSetting
     {
-        [XmlElement("MaximumDistance")]
+        [XmlAttribute("Pos")]
         public Vector3 position;
-        [XmlElement("MinimumDistance")]
+        [XmlAttribute("Rot")]
+        public Vector3 rotation;
+        [XmlAttribute("MinimumDist")]
         public float minDistance;
-        [XmlElement("MaximumDistance")]
+        [XmlAttribute("MaximumDist")]
         public float maxDistance;
-        [XmlElement("verticalFOV")]
+        [XmlAttribute("verticalFOV")]
         public float verticalFOV;
-        [XmlElement("horizontalFOV")]
+        [XmlAttribute("horizontalFOV")]
         public float horizontalFOV;
-        [XmlElement("verticalResolution")]
+        [XmlAttribute("verticalRes")]
         public float verticalResolution;
-        [XmlElement("horizontalResolution(azimuth)")]
+        [XmlAttribute("horizontalRes")]
         public float horizontalResolution;
-        [XmlElement("frameRate")]
-        public float frameRate;
+        [XmlAttribute("FPS")]
+        public int frameRate;
     }
 
     public struct CameraLog
@@ -92,18 +98,26 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
         public float velocity;
     }
 
+    public struct PCDrow
+    {
+        public Vector3 position;
+        public float distance;
+    }
+
     class CameraVanEdit : MonoBehaviour
     {
         myFileBrowserDialog fbd;
         GameObject fileBrowser;
+        Alert alert;
 
         List<GameObject> cameraSet;
         GameObject cameraSetOrigin;
         GameObject controllerObject;
         CarController carController;
         CameraMode cameraMode = CameraMode.None;
-        public List<CameraVanCameraSettings.CameraSettingItem> cameraList;
+        public List<CameraSetting> cameraList;
         public LaserSetting laserScanner;
+        GameObject liDAROrigin;
 
         RecordLog recordLog;
         private int cameraIDIterator = -1;
@@ -120,6 +134,9 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
         Text steerText;
         Text velocityText;
 
+        System.Diagnostics.Stopwatch stopwatch;
+            
+
         private bool hasCamera = false, hasLaserScanner = false;
 
 
@@ -131,7 +148,6 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             GeneratingPCD,
             None
         }
-
 
         void FixedUpdate()
         {
@@ -155,7 +171,6 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             else if (cameraMode == CameraMode.GeneratingPCD)
                 generatePCDOperations();
         }
-
 
         void Start()
         {
@@ -190,6 +205,10 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
                 controllerObject = GameObject.Find("Third Person (Ethan)");
 
             GameObject.Destroy(controllerObject);
+
+            LoadSaveMenu lsm = GameObject.Find("Canvas").transform.Find("LoadSave Menu").GetComponent<LoadSaveMenu>();
+            lsm.scene.controller = null;
+
             carController = null;
             this.gameObject.SetActive(false);
         }
@@ -218,9 +237,11 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
 
                if (cameraList != null && cameraList.Count > 0)
                    hasCamera = true;
-               //if (laserList != null && laserList.Count > 0)
-               //    hasLaserScanner = true;
-
+               if (laserScanner.frameRate != 0)
+               {
+                   laserFrameTime = 1.0f / laserScanner.frameRate;
+                   hasLaserScanner = true;
+               }
                cameraMode = CameraMode.Recording;
                cameraButton.image.sprite = Resources.Load<Sprite>("Textures/Menu/CameraVan/stopIcon");
            }
@@ -298,7 +319,7 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
                 }
 
                 LogEntry entry = new LogEntry();
-                entry.id = cameraFrameID++;
+                entry.id = laserFrameID++;
                 entry.velocity = velocity;
                 entry.position = translate;
                 entry.rotation = rotation;
@@ -312,7 +333,6 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
 
         private void processModeOperations()
         {
-
             if (fbd.state == myFileBrowserDialog.BrowserState.Processing)
                 return;
             else if (fbd.state == myFileBrowserDialog.BrowserState.Cancelled)
@@ -327,62 +347,71 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             }
             else
                 saveFolder = fbd.selectedPath + "/" + fbd.saveName;
+
             Debug.Log("Processing Coordinates");
+            StartCoroutine(processHelper());
+
             Directory.CreateDirectory(saveFolder);
 
-            recordLog.cameraLog.frameRate = int.Parse(transform.Find("Panel").Find("IFframeRate").GetComponent<InputField>().text);
-            recordLog.cameraSettings = new List<CameraSetting>();
-
-            for (int c = 0; c < cameraList.Count; c++)
+            if (cameraList == null)
+            {                
+                recordLog.laserSettings = laserScanner;
+                recordLog.laserLog.frameRate = laserScanner.frameRate;
+                generateLog(saveFolder);
+                cameraMode = CameraMode.GeneratingPCD;
+                return;
+            }
+            else
             {
-                CameraSetting cset = new CameraSetting();
-                cset.fieldOfView = cameraList[c].fieldOfView;
-                cset.id = cameraList[c].id;
-                cset.position = cameraList[c].position;
-                cset.pitch = cameraList[c].pitch;
-                cset.yaw = cameraList[c].yaw;
-                cset.roll = cameraList[c].roll;
-                recordLog.cameraSettings.Add(cset);
+                recordLog.cameraLog.frameRate = int.Parse(transform.Find("Panel").Find("IFframeRate").GetComponent<InputField>().text);
+                recordLog.cameraSettings = new List<CameraSetting>();
+
+                cameraSet = new List<GameObject>();
+                cameraSetOrigin = new GameObject();
+
+                for (int c = 0; c < cameraList.Count; c++)
+                {
+                    CameraSetting cset = new CameraSetting();
+                    cset.fieldOfView = cameraList[c].fieldOfView;
+                    cset.id = cameraList[c].id;
+                    cset.position = cameraList[c].position;
+                    cset.pitch = cameraList[c].pitch;
+                    cset.yaw = cameraList[c].yaw;
+                    cset.roll = cameraList[c].roll;
+                    recordLog.cameraSettings.Add(cset);
+
+                    GameObject camObj = new GameObject("Cam" + cameraList[c].id, typeof(Camera), typeof(ControllerCam));
+                    ControllerCam camScript = camObj.GetComponent<ControllerCam>();
+                    camScript.saveFolder = saveFolder;
+                    camScript.loadSetting(cameraList[c]);
+                    camObj.transform.SetParent(cameraSetOrigin.transform);
+                    Directory.CreateDirectory(saveFolder + "/" + camObj.name);
+                    cameraSet.Add(camObj);
+
+                }
+
             }
 
             generateLog(saveFolder);
-
-            cameraSet = new List<GameObject>();
-            cameraSetOrigin = new GameObject();
-
-            for (int k = 0; k < cameraList.Count; k++)
-            {
-                GameObject camObj = new GameObject("Cam" + cameraList[k].id,typeof(Camera),typeof(ControllerCam));
-                ControllerCam camScript = camObj.GetComponent<ControllerCam>();
-                camScript.saveFolder = saveFolder;
-                camScript.loadSetting(cameraList[k]);
-                camObj.transform.SetParent(cameraSetOrigin.transform);
-                Directory.CreateDirectory(saveFolder + "/" + camObj.name);
-                cameraSet.Add(camObj);
-            }
-           
             controllerObject.SetActive(false);
             cameraMode = CameraMode.GeneratingScreenShots;
+
+            stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
         }
 
         private void generateScreenShotOperations()
         {
             if (updateIterators())
             {
-                Button cameraButton = this.transform.Find("Panel").Find("ButtonCameraMode").GetComponent<Button>();
-                cameraButton.interactable = true;
-
-                if (carController != null)
-                {
-                    carController.wheelColliders[0].brakeTorque = 0;
-                    carController.wheelColliders[1].brakeTorque = 0;
-                }
-                controllerObject.SetActive(true);
-                cameraMode = CameraMode.None;
+                stopwatch.Stop();
+                Debug.Log("<color=green>SCREEN SHOT GENERATE TIME:</color>" + stopwatch.ElapsedMilliseconds);
+                cameraMode = CameraMode.GeneratingPCD;
+                for (int k = 0; k < cameraSet.Count; k++)               
+                    cameraSet[k].GetComponent<Camera>().enabled = false;                
                 return;
             }
-
-          //  SSgenerator.TakeScreenShot(cameraSet[cameraIDIterator].gameObject,saveFolder,recordLog.cameraLog.cameraEntries[cameraLogEntryIterator]);
 
             ControllerCam cameraScript = cameraSet[cameraIDIterator].GetComponent<ControllerCam>();
             cameraScript.loadLogEntry(recordLog.cameraLog.cameraEntries[cameraLogEntryIterator]);
@@ -397,10 +426,108 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
 
         private void generatePCDOperations()
         {
+            Button cameraButton = this.transform.Find("Panel").Find("ButtonCameraMode").GetComponent<Button>();
+
+            if (!hasLaserScanner)
+            {
+                cameraMode = CameraMode.None;
+                alert.closeAlertDialog();
+                cameraButton = this.transform.Find("Panel").Find("ButtonCameraMode").GetComponent<Button>();
+                cameraButton.interactable = true;
+
+                if (carController != null)
+                {
+                    carController.wheelColliders[0].brakeTorque = 0;
+                    carController.wheelColliders[1].brakeTorque = 0;
+                }
+                controllerObject.SetActive(true);
+                return;
+            }
+
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
 
 
+            //This is the Game Object contains transform of the camera Van
+            liDAROrigin = new GameObject();
+
+            //This is the Game Object contains transform information of the LiDAR device wrt Camera Van
+            GameObject liDAR = new GameObject();
+            liDAR.transform.position = laserScanner.position;
+            Quaternion liDARquat = new Quaternion();
+            liDARquat.eulerAngles = laserScanner.rotation;
+            liDAR.transform.rotation = liDARquat;
+
+            //liDAR and Camera Van is Linked
+            liDAR.transform.SetParent(liDAROrigin.transform);            
+                       
+            Directory.CreateDirectory(saveFolder + "\\PCD");
+
+            int verticalBeamCount =  (int)(laserScanner.verticalFOV / laserScanner.verticalResolution) +1;
+            int horizontalBeamCount = (int)(laserScanner.horizontalFOV / laserScanner.horizontalResolution) +1;
+
+            for (int k = 0 ; k < recordLog.laserLog.laserEntries.Count ; k++)
+            {
+                liDAROrigin.transform.position = recordLog.laserLog.laserEntries[k].position;
+                Quaternion quat = new Quaternion();
+                quat.eulerAngles = recordLog.laserLog.laserEntries[k].rotation;
+                liDAROrigin.transform.localRotation = quat;
+
+                RaycastHit hit = new RaycastHit();
+                List<PCDrow> PCDList = new List<PCDrow>();
+
+                Vector3 laserDirection;
+
+                for(int i = 0 ; i < verticalBeamCount ; i++)
+                {
+                    Vector3 vertlaserDirection = Quaternion.AngleAxis(laserScanner.verticalFOV / 2 - i * laserScanner.verticalResolution, -liDAR.transform.right) * liDAR.transform.forward;
+ 
+                    for(int j = 0 ; j < horizontalBeamCount ; j++)
+                    {
+                        laserDirection = Quaternion.AngleAxis(-laserScanner.horizontalFOV / 2 + j * laserScanner.horizontalResolution, liDAR.transform.up) * vertlaserDirection;
+
+                        //FOR DEBUG
+                        //Debug.DrawRay(liDAR.transform.position, laserDirection, new Color(255, 0, 0), 120);
+                        
+                        bool isHit = Physics.Raycast(liDAR.transform.position, laserDirection, out hit,laserScanner.maxDistance);
+                                             
+                        PCDrow row = new PCDrow();
+                        if (isHit && (hit.distance > laserScanner.minDistance))
+                        {
+                            row.position = hit.point;
+                            row.distance = hit.distance;
+                        }
+                        else
+                        {
+                            row.position = new Vector3();
+                            row.distance = 0.0f;
+                        }
+                            PCDList.Add(row);
+                  
+                    }
+                }
+
+                PCDGenerator(saveFolder + "\\PCD\\frame_" + k.ToString() + ".pcd" ,PCDList, horizontalBeamCount,verticalBeamCount);
+               
+                //FOR DEBUG
+                //cameraMode = CameraMode.None;
+                //alert.closeAlertDialog();
+                //return;
+            }
+
+            stopwatch.Stop();
+            Debug.Log("<color=blue>PCD FILE GENERATION TIME</color>" + stopwatch.ElapsedMilliseconds);
+         
+            cameraButton.interactable = true;
+            if (carController != null)
+            {
+                carController.wheelColliders[0].brakeTorque = 0;
+                carController.wheelColliders[1].brakeTorque = 0;
+            }
+            controllerObject.SetActive(true);
+            cameraMode = CameraMode.None;
+            alert.closeAlertDialog();
         }
-
 
         private bool updateIterators()
         {
@@ -420,6 +547,40 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
             return false;
         }
 
+        private void PCDGenerator(string savePath, List<PCDrow> pointList, int horizontalBeamCount, int verticalBeamCount)
+        {
+            string content;
+
+            string header = "#POLIMI OSM CITY ENGINE PCD DATA" + "\n" +
+                            "VERSION .7" + "\n" +
+                            "FIELDS x y z distance" + "\n" +
+                            "SIZE 4 4 4 4" + "\n" +
+                            "TYPE F F F F" + "\n" +
+                            "COUNT 1 1 1 1" + "\n" +
+                            "WIDTH " + horizontalBeamCount.ToString() + "\n" +
+                            "HEIGHT " + verticalBeamCount.ToString() + "\n" +
+                            "VIEWPOINT 0 0 0 1 0 0 0" + "\n" +
+                            "POINTS " + (horizontalBeamCount * verticalBeamCount).ToString() + "\n" +
+                            "DATA ascii" + "\n";
+
+            string data = "";
+
+            for (int k = 0; k < pointList.Count; k++)
+            {
+                data = data + pointList[k].position.x.ToString() + " " + pointList[k].position.y.ToString() + " " + pointList[k].position.z.ToString() +
+                       " " + pointList[k].distance.ToString() + "\n";
+            }
+
+            content = header + data;
+            System.IO.File.WriteAllText(savePath, content);
+        }
+
+        private IEnumerator processHelper()
+        {
+            alert = new Alert();
+            alert.openAlertDialog("Generating Output Data might take several minutes depends on settings. Please wait...");
+            yield return new WaitForSeconds(0.2f);
+        }
     }
 
 

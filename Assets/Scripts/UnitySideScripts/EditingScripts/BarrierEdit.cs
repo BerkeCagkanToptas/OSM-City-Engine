@@ -17,8 +17,6 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
         private GameObject fileBrowser;
         private myFileBrowserDialog fbd;
 
-        GameObject barrierEditMenu;
-
         //GETS THE SCENE OBJECT FROM THEM
         GameObject loadSaveMenu;
         LoadSaveMenu lsm;
@@ -51,7 +49,7 @@ namespace Assets.Scripts.UnitySideScripts.EditingScripts
         }
         public void clickClose()
         {
-            barrierEditMenu.SetActive(false);
+            this.gameObject.SetActive(false);
         }
 
         public void clickSave()

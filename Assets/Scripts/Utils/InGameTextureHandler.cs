@@ -116,6 +116,21 @@ namespace Assets.Scripts.Utils
 
             return mat;
         }
+
+        public static Material createMaterial2(string colorTexturePath, string normalTexturePath, string specularTexturePath)
+        {
+            WWW loader;
+            Material mat = new Material(Shader.Find("Bumped Diffuse"));
+
+            loader = new WWW("file://" + colorTexturePath);
+            mat.SetTexture("_MainTex", loader.texture);
+
+            loader = new WWW("file://" + normalTexturePath);
+            Texture2D normalTexture = NormalMap(loader.texture);
+            mat.SetTexture("_BumpMap", normalTexture);
+            mat.SetFloat("_BumpScale", 1.0f);
+            return mat;
+        }
     
     }
 }

@@ -368,8 +368,8 @@ namespace Assets.Scripts.SceneObjects
                     Vector3 off = new Vector3(5.0f, 5.0f, 5.0f);
                     float hL = getTerrainHeight2(terrainInfo.meterPositions[m, n].x - off.x, terrainInfo.meterPositions[m, n].y);
                     float hR = getTerrainHeight2(terrainInfo.meterPositions[m, n].x + off.x, terrainInfo.meterPositions[m, n].y);
-                    float hD = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y - off.z);
-                    float hU = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y + off.z);
+                    float hD = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y + off.z);
+                    float hU = getTerrainHeight2(terrainInfo.meterPositions[m, n].x, terrainInfo.meterPositions[m, n].y - off.z);
                 
                     // deduce terrain normal
                     Vector3 N = new Vector3();

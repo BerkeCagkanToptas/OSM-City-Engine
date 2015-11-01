@@ -81,7 +81,7 @@
       <HintPath>Assets\Plugins\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="ObjReader">
-      <HintPath>Assets\Plugins\ObjReader.dll</HintPath>
+      <HintPath>Assets\Plugins\ObjReader\ObjReader.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -107,7 +107,7 @@
     <Compile Include="Assets\Scripts\SceneObjects\Building\BuildingListModeller.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Highway\DrapeHighway.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Highway\Highway.cs" />
-    <Compile Include="Assets\Scripts\SceneObjects\Highway\HighwayListModeller.cs" />
+    <Compile Include="Assets\Scripts\SceneObjects\Highway\HighwayListModeller[Deprecated].cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Highway\HighwayModeller.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Highway\Pavement.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\Object3D\DefaultObject3DHandler.cs" />
@@ -115,8 +115,8 @@
     <Compile Include="Assets\Scripts\SceneObjects\Scene.cs" />
     <Compile Include="Assets\Scripts\SceneObjects\myTerrain.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\UnitySideScripts\ControllerScripts\ControllerCam.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\CarController.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\ControllerScripts\ControllerCam.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\ControllerScripts\ControllerLaserScanner.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\BarrierEdit.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\BuildingEdit.cs" />
@@ -125,6 +125,7 @@
     <Compile Include="Assets\Scripts\UnitySideScripts\EditingScripts\ObjectEdit.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\AddObjectMenu\ObjectList.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\AddObjectMenu\ObjectTypeSelector.cs" />
+    <Compile Include="Assets\Scripts\UnitySideScripts\Menus\Alert.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\CameraVanCameraSettings.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\CameraVanLaserSettings.cs" />
     <Compile Include="Assets\Scripts\UnitySideScripts\Menus\DefaultSettingsMenu\DefaultBarrierSettings.cs" />
@@ -162,7 +163,6 @@
     <None Include="Assets\Resources\OSMFiles\comoGeneral.xml" />
     <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />
     <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

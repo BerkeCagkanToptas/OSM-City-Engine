@@ -57,6 +57,7 @@ namespace Assets.Scripts.SceneObjects
 
         public List<Object3D> streetLampList;
 
+        //Highway Constructor
         public Highway(Way w, List<HighwayConfigurations> config, myTerrain _terrain)
         {
             id = w.id;
@@ -82,6 +83,42 @@ namespace Assets.Scripts.SceneObjects
             if(type != highwayType.River)
                 highwayGameObject.tag = "Highway";
                     
+        }
+
+        //Highway Constructor (Uses Save File)
+        public Highway(Way w, List<HighwayConfigurations> config, myTerrain _terrain, HighwaySave save)
+        {
+            id = w.id;
+            way = w;
+            type = getHighwayType(w.tags);
+            name = getHighwayName(w.tags);
+
+            if (type == highwayType.HighwayFootway)
+                return;
+
+
+            getConfiguration(config);
+            waySize = save.waySize;
+            hasLeftSidewalk = save.hasLeftSidewalk;
+            hasRightSideWalk = save.hasRightSidewalk;
+            leftSidewalkSize = save.leftSidewalkSize;
+            rightSidewalkSize = save.rightSidewalkSize;
+            
+            bbox = _terrain.scenebbox;
+            
+            streetLampList = new List<Object3D>();
+            generateInitial3Dway(_terrain);
+            //colliderMesh = generateColliderMesh();
+
+            highwayGameObject = new GameObject("Highway" + way.id, typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider));
+            highwayGameObject.transform.localScale = new Vector3(1, 1, 1);
+
+
+            if (type != highwayType.River)
+                highwayGameObject.tag = "Highway";
+
+
+
         }
 
         //Create Highway GameObject to Render

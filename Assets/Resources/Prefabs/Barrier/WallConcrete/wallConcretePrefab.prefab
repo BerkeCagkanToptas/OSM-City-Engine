@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 481812}
   - 33: {fileID: 3310734}
   - 23: {fileID: 2372414}
-  - 65: {fileID: 6523386}
+  - 64: {fileID: 6459776}
   m_Layer: 0
   m_Name: wallConcretePrefab
   m_TagString: Untagged
@@ -25,7 +25,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 115268}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 335.160004, y: 398, z: -573.549988}
+  m_LocalPosition: {x: 1149.98743, y: 326.434387, z: 268.981323}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -40,7 +40,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: 240cf4401691f41b1a74830e0e7d5692, type: 2}
+  - {fileID: 2100000, guid: d9a184a0e2c80084c945b615db6e789e, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -61,8 +61,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 115268}
   m_Mesh: {fileID: 4300000, guid: e8833937b85614ecdb59ff6b1f686048, type: 3}
---- !u!65 &6523386
-BoxCollider:
+--- !u!64 &6459776
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -71,8 +71,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.88000059, y: 1.30779934, z: .506720901}
-  m_Center: {x: -1.78813934e-07, y: .65389967, z: -8.58306885e-06}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: e8833937b85614ecdb59ff6b1f686048, type: 3}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
